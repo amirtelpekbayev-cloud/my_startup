@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Florify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#ECE2D0;
+  --card:#FFFDF8;
+  --card-alt:#FBF6EC;
+  --column:#F6EDE0;
+  --line:#E0D2BE;
+  --line-soft:#F0E5D5;
+  --ink:#3B2B2F;
+  --ink-soft:#6B5B55;
+  --rose:#A26769;
+  --rose-soft:#B0A197;
+  --burgundy:#6D2E46;
+  --burgundy-hover:#5A2439;
+  --amber:#F2A65A;
+  --amber-hover:#E8964A;
+  --amber-ink:#4A2418;
+}
+*{box-sizing:border-box}
+html{background:var(--cream)}
+body{
+  margin:0;background:var(--cream);color:var(--ink);
+  font-family:'Golos Text',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:'Manrope',system-ui,sans-serif;margin:0}
+a{color:var(--burgundy)}
+a:hover{color:var(--rose)}
+input,select,textarea,button{font-family:inherit;font-size:14px}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{
+  outline:2px solid var(--amber);outline-offset:2px;
+}
+::selection{background:color-mix(in srgb, var(--burgundy) 25%, transparent)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001s !important;transition:none !important}
+}
+
+.shell{min-height:100vh;padding:28px 32px 72px;max-width:1400px;margin:0 auto}
+
+/* ---------- header ---------- */
+.topbar{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:24px}
+.brand h1{font-weight:800;font-size:44px;letter-spacing:-0.03em;color:var(--burgundy)}
+.brand p{margin:6px 0 0;font-size:14px;color:var(--rose)}
+.demo-pill{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:999px;padding:8px 16px;box-shadow:0 2px 10px rgba(109,46,70,.08);font-size:13px;color:var(--burgundy);white-space:nowrap}
+.demo-dot{width:9px;height:9px;border-radius:50%;background:#2f6d5d;flex:none}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px}
+.tab-btn{
+  border:none;cursor:pointer;font-size:14.5px;font-weight:600;font-family:'Manrope',sans-serif;
+  padding:11px 20px;border-radius:999px;transition:background .15s,color .15s,box-shadow .15s;
+  background:var(--card);color:var(--rose);
+}
+.tab-btn.active{background:var(--burgundy);color:#FFF7EC;box-shadow:0 4px 14px rgba(109,46,70,.25)}
+.tab-btn:not(.active):hover{background:#F6EDE0}
+
+/* ---------- generic surfaces ---------- */
+.panel-stack{display:flex;flex-direction:column;gap:24px}
+.card-surface{background:var(--card);border-radius:24px;padding:22px 24px;box-shadow:0 6px 24px rgba(109,46,70,.09)}
+.card-surface h2{font-weight:600;font-size:19px;color:var(--burgundy)}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.section-head .hint{font-size:12.5px;color:var(--rose)}
+
+/* ---------- capture card ---------- */
+.chat-input{
+  width:100%;border:1px solid var(--line);background:var(--card-alt);border-radius:16px;
+  padding:14px 16px;font-size:14.5px;line-height:1.5;color:var(--ink);resize:vertical;
+}
+.capture-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:14px}
+.btn-recognize{
+  border:none;border-radius:999px;padding:12px 26px;font-size:14.5px;font-weight:600;
+  font-family:'Manrope',sans-serif;cursor:pointer;background:var(--amber);color:var(--amber-ink);
+  box-shadow:0 4px 14px rgba(242,166,90,.35);transition:background .15s;
+}
+.btn-recognize:hover{background:var(--amber-hover)}
+.btn-recognize[disabled]{background:#E8D9C3;color:#9A8A80;cursor:default;box-shadow:none}
+.spinner{width:16px;height:16px;border:2px solid var(--amber);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex:none}
+.recognize-hint{font-size:12.5px;color:var(--rose)}
+
+.recognized{margin-top:20px;padding-top:20px;border-top:1px dashed var(--line);animation:pop .25s ease both}
+.recognized-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.recognized-flag{background:var(--amber);color:var(--amber-ink);font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:999px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.field{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--rose)}
+.field input,.field select{
+  border:1px solid var(--line);background:var(--card-alt);border-radius:12px;padding:11px 13px;
+  font-size:14px;color:var(--ink);width:100%;
+}
+.form-actions{display:flex;gap:10px;margin-top:16px}
+.btn-primary{background:var(--burgundy);color:#FFF7EC;border:none;border-radius:999px;padding:12px 24px;font-size:14.5px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(109,46,70,.25);font-family:'Manrope',sans-serif;transition:background .15s}
+.btn-primary:hover{background:var(--burgundy-hover)}
+.btn-cancel{background:transparent;color:var(--rose);border:1px solid var(--line);border-radius:999px;padding:12px 20px;font-size:14.5px;cursor:pointer;transition:background .15s}
+.btn-cancel:hover{background:#F6EDE0}
+
+/* ---------- kanban ---------- */
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:16px;align-items:start}
+.column{background:var(--column);border-radius:22px;padding:16px;border:1px solid transparent;min-height:200px;transition:border-color .15s}
+.column.drag-over{border-color:var(--col-accent)}
+.column-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.col-dot{width:9px;height:9px;border-radius:50%;background:var(--col-accent);flex:none}
+.column-head h3{font-weight:600;font-size:14.5px;color:var(--burgundy);min-width:0;overflow-wrap:break-word}
+.col-count{margin-left:auto;font-size:12px;color:var(--rose);background:#F0E5D5;border-radius:999px;padding:2px 9px}
+.col-body{display:flex;flex-direction:column;gap:12px;min-height:80px}
+.kcard{
+  background:var(--card);border-radius:18px;padding:15px;border:1px solid var(--line-soft);
+  box-shadow:0 2px 10px rgba(109,46,70,.07);cursor:grab;
+}
+.kcard.dragging{opacity:.4}
+.kcard-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.kcard-bouquet{margin:0;font-family:'Manrope',sans-serif;font-weight:600;font-size:14.5px;line-height:1.35;color:var(--ink)}
+.channel-badge{flex:none;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.channel-badge.wa{background:#DDF0E4;color:#1F6B45}
+.channel-badge.ig{background:#FAE0EC;color:#9B2C6B}
+.kcard-price{margin:10px 0 0;font-family:'Manrope',sans-serif;font-weight:800;font-size:19px;color:var(--burgundy)}
+.kcard-meta{display:flex;flex-direction:column;gap:4px;margin-top:10px;font-size:12.5px}
+.muted{color:var(--rose-soft);font-size:12px}
+.filled{color:var(--ink-soft)}
+.kcard-client{display:flex;align-items:center;gap:7px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line-soft)}
+.avatar{width:22px;height:22px;border-radius:50%;background:#F6EDE0;color:var(--rose);font-size:10.5px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none}
+.client-name{font-size:13px;color:var(--ink)}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+thead th{text-align:left;padding:10px 12px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--rose);border-bottom:1px solid var(--line-soft);white-space:nowrap}
+th.num,td.num{text-align:right}
+tbody td{padding:14px 12px;border-bottom:1px solid #F4EADB}
+.orders-count{font-family:'Manrope',sans-serif;font-weight:600;color:var(--burgundy)}
+.phone-col{color:var(--ink-soft)}
+
+.panel-head-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+.add-form{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;background:var(--card-alt);border-radius:16px;padding:16px;margin-bottom:18px;animation:pop .2s ease both}
+.add-form .field input{background:var(--card);min-width:200px}
+.btn-save{background:var(--amber);color:var(--amber-ink);border:none;border-radius:999px;padding:11px 22px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Manrope',sans-serif;transition:background .15s}
+.btn-save:hover{background:var(--amber-hover)}
+
+/* ---------- stock ---------- */
+.stock-name{display:inline-flex;align-items:center;gap:9px}
+.low-badge{background:var(--amber);color:var(--amber-ink);font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:999px}
+tr.low-row{background:#FDF3E3}
+.qty-cell{font-family:'Manrope',sans-serif;font-weight:600;color:var(--ink)}
+.qty-btns{display:flex;gap:8px;justify-content:flex-end}
+.qty-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--card-alt);color:var(--burgundy);font-size:17px;line-height:1;cursor:pointer;transition:background .15s}
+.qty-btn:hover{background:#F2E4D2}
+
+/* ---------- writeoffs ---------- */
+.wo-form{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+.wo-form .field select,.wo-form .field input{min-width:180px}
+.wo-form .field.qty input{width:120px;min-width:0}
+.reason-tag{background:#F6EDE0;color:#8A5A4E;border-radius:999px;padding:3px 11px;font-size:12.5px;white-space:nowrap}
+.wo-qty{font-family:'Manrope',sans-serif;font-weight:600;color:var(--burgundy)}
+
+/* ---------- summary ---------- */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
+.stat-card{background:var(--card);border-radius:24px;padding:26px;box-shadow:0 6px 24px rgba(109,46,70,.09)}
+.stat-label{margin:0;font-size:13px;color:var(--rose)}
+.stat-value{margin:10px 0 0;font-family:'Manrope',sans-serif;font-weight:800;font-size:40px;line-height:1;letter-spacing:-0.03em;color:var(--burgundy);font-variant-numeric:tabular-nums}
+.stat-note{margin:8px 0 0;font-size:12.5px;color:#8A7A72}
+
+@media (max-width:640px){
+  .shell{padding:20px 16px 56px}
+  .brand h1{font-size:34px}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <h1>Florify</h1>
+      <p>AI-ассистент приёма заказов для цветочного магазина</p>
+    </div>
+    <div class="demo-pill"><span class="demo-dot"></span>Демо-режим · данные в памяти</div>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+  <div id="panel"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var MONTHS = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+  var STATUS = {
+    new:     { title: 'Новый',           color: '#c9a648' },
+    build:   { title: 'В сборке',        color: '#2f5fa8' },
+    courier: { title: 'Передан курьеру', color: '#7a5ea8' },
+    done:    { title: 'Доставлен',       color: '#2f6d5d' }
+  };
+  var STATUS_ORDER = ['new','build','courier','done'];
+  var FLOWERS = ['пион','роз','тюльпан','хризантем','орхиде','лили'];
+  var FLOWER_NAME = { 'пион':'Пионы','роз':'Розы','тюльпан':'Тюльпаны','хризантем':'Хризантемы','орхиде':'Орхидеи','лили':'Лилии' };
+  var TABS = [['orders','Заказы'],['clients','Клиенты'],['stock','Склад'],['writeoffs','Списания'],['summary','Сводка']];
+
+  function fmtDate(d){ return d.getDate() + ' ' + MONTHS[d.getMonth()]; }
+  function day(offset){ var d = new Date(); d.setDate(d.getDate() + offset); return fmtDate(d); }
+  function money(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₸'; }
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  function parseOrder(text){
+    var t = text.toLowerCase();
+    var out = { bouquet:'', budget:'', date:'', address:'', client:'', channel:'WhatsApp' };
+
+    var m = t.match(/(?:бюджет|до|около|за)?\s*([0-9][0-9\s]{2,8})\s*(?:тг|тенге|₸|k|тыс)/);
+    if (!m) m = t.match(/бюджет[^0-9]{0,12}([0-9][0-9\s]{2,8})/);
+    if (!m) m = t.match(/(?<![0-9:.])([0-9]{4,6})(?![0-9:.])/);
+    if (m) {
+      var n = parseInt(m[1].replace(/\s/g, ''), 10);
+      if (!isNaN(n) && n >= 1000) out.budget = String(n);
+    }
+
+    var found = [];
+    FLOWERS.forEach(function(k){ if (t.indexOf(k) !== -1) found.push(FLOWER_NAME[k]); });
+    var cnt = t.match(/([0-9]{1,3})\s*(?:шт|штук|цветк|бутон)/);
+    if (found.length) out.bouquet = found.join(' + ') + (cnt ? ', ' + cnt[1] + ' шт.' : '');
+
+    var parts = [];
+    if (/послезавтра/.test(t)) parts.push('послезавтра');
+    else if (/завтра/.test(t)) parts.push('завтра');
+    else if (/сегодня/.test(t)) parts.push('сегодня');
+    var tm = t.match(/(?:к\s*)?([0-2]?[0-9])[:.]([0-5][0-9])/) || t.match(/к\s*([0-2]?[0-9])\s*(?:час|ч\b)/);
+    if (tm) parts.push(tm[2] !== undefined ? (tm[1].length === 1 ? '0' + tm[1] : tm[1]) + ':' + tm[2] : tm[1] + ':00');
+    if (parts.length) out.date = parts.join(', ');
+
+    var am = text.match(/((?:ул\.?|улица|мкр\.?|микрорайон|пр-т|проспект|пр\.)\s*[^,.;!?\n]*)/i);
+    if (am) out.address = am[1].trim().replace(/\s+/g, ' ');
+
+    var nm = text.match(/(?:зовут|это|я\s+—?|меня)\s+([А-ЯЁ][а-яё]+)/) || text.match(/(?:зовут|имя)[:\s]+([а-яё]+)/i);
+    if (nm) out.client = nm[1].charAt(0).toUpperCase() + nm[1].slice(1);
+
+    if (/инстаграм|instagram|директ|direct/i.test(text)) out.channel = 'Instagram';
+    return out;
+  }
+
+  /* ---------------- state ---------------- */
+  var state = {
+    tab: 'orders',
+    chat: '',
+    loading: false,
+    showForm: false,
+    form: { bouquet:'', budget:'', date:'', address:'', client:'', channel:'WhatsApp' },
+    dragId: null,
+    nextId: 6,
+    orders: [
+      { id:1, bouquet:'Пионы розовые, 15 шт.', budget:28000, date: day(0) + ', 14:00', address:'ул. Абая 150, кв. 12', client:'Айгуль Сарсенова', channel:'WhatsApp', status:'new', today:true },
+      { id:2, bouquet:'Розы кремовые, 25 шт.', budget:45000, date: day(0) + ', 18:30', address:'мкр. Самал-2, д. 33', client:'Данияр Ким', channel:'Instagram', status:'new', today:true },
+      { id:3, bouquet:'Тюльпаны микс, 51 шт.', budget:19500, date: day(1) + ', 10:00', address:'ул. Толе би 59', client:'Мадина Оспанова', channel:'WhatsApp', status:'build', today:false },
+      { id:4, bouquet:'Хризантемы с эвкалиптом', budget:22000, date: day(0) + ', 16:00', address:'ул. Жандосова 8', client:'Ержан Абдиров', channel:'Instagram', status:'courier', today:true },
+      { id:5, bouquet:'Орхидея в кашпо', budget:36000, date: day(-1) + ', 12:00', address:'мкр. Аксай-3, д. 4', client:'Сауле Ким', channel:'WhatsApp', status:'done', today:false }
+    ],
+    clients: [
+      { name:'Айгуль Сарсенова', phone:'+7 701 234 55 10', orders:6 },
+      { name:'Данияр Ким', phone:'+7 705 880 12 04', orders:3 },
+      { name:'Мадина Оспанова', phone:'+7 747 301 77 22', orders:9 },
+      { name:'Ержан Абдиров', phone:'+7 702 445 19 38', orders:2 },
+      { name:'Сауле Ким', phone:'+7 708 612 90 41', orders:5 }
+    ],
+    showClientForm: false,
+    newClient: { name:'', phone:'' },
+    stock: [
+      { name:'Пионы', qty:24 }, { name:'Розы красные', qty:60 },
+      { name:'Розы кремовые', qty:8 }, { name:'Тюльпаны', qty:45 },
+      { name:'Хризантемы', qty:12 }, { name:'Орхидеи', qty:6 },
+      { name:'Лилии', qty:18 }, { name:'Эвкалипт', qty:9 }
+    ],
+    wo: { flower:'Пионы', qty:1, reason:'брак' },
+    writeoffs: [
+      { flower:'Розы кремовые', qty:5, reason:'увял', date: day(-1) },
+      { flower:'Пионы', qty:3, reason:'брак', date: day(-2) },
+      { flower:'Тюльпаны', qty:7, reason:'сломался', date: day(-4) },
+      { flower:'Орхидеи', qty:2, reason:'рекламация', date: day(-6) }
+    ]
+  };
+
+  var panel = document.getElementById('panel');
+  var tabsEl = document.getElementById('tabs');
+
+  /* ---------------- tabs ---------------- */
+  function renderTabs(){
+    tabsEl.innerHTML = TABS.map(function(t){
+      return '<button type="button" class="tab-btn' + (state.tab === t[0] ? ' active' : '') + '" data-tab="' + t[0] + '">' + t[1] + '</button>';
+    }).join('');
+  }
+  tabsEl.addEventListener('click', function(e){
+    var btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    state.tab = btn.getAttribute('data-tab');
+    renderTabs();
+    renderPanel();
+  });
+
+  function renderPanel(){
+    if (state.tab === 'orders') renderOrdersTab();
+    else if (state.tab === 'clients') renderClientsTab();
+    else if (state.tab === 'stock') renderStockTab();
+    else if (state.tab === 'writeoffs') renderWriteoffsTab();
+    else renderSummaryTab();
+  }
+
+  /* ---------------- Orders tab ---------------- */
+  function renderOrdersTab(){
+    panel.innerHTML =
+      '<section class="panel-stack">' +
+        '<div class="card-surface">' +
+          '<div class="section-head">' +
+            '<h2>Новый заказ из переписки</h2>' +
+            '<span class="hint">Вставьте сообщение клиента — ассистент разберёт его на поля</span>' +
+          '</div>' +
+          '<textarea id="chatInput" class="chat-input" rows="4" placeholder="Здравствуйте! Хочу букет пионов, бюджет 28000 тенге, доставить завтра к 18:00, ул. Абая 150, меня зовут Айгуль"></textarea>' +
+          '<div class="capture-row">' +
+            '<button type="button" id="recognizeBtn" class="btn-recognize">' + (state.loading ? 'Распознаём…' : 'Распознать ИИ') + '</button>' +
+            (state.loading ? '<span class="spinner"></span>' : '') +
+            '<span class="recognize-hint">' + (state.loading ? 'Ассистент читает переписку' : 'Поля можно поправить перед созданием') + '</span>' +
+          '</div>' +
+          '<div id="recognizedArea"></div>' +
+        '</div>' +
+        '<div class="board" id="board"></div>' +
+      '</section>';
+
+    var chatInput = document.getElementById('chatInput');
+    chatInput.value = state.chat;
+    chatInput.addEventListener('input', function(){ state.chat = chatInput.value; });
+
+    var recognizeBtn = document.getElementById('recognizeBtn');
+    if (state.loading) recognizeBtn.setAttribute('disabled', 'disabled');
+    recognizeBtn.addEventListener('click', onRecognize);
+
+    renderRecognized();
+    renderBoard();
+  }
+
+  function renderRecognized(){
+    var area = document.getElementById('recognizedArea');
+    if (!area) return;
+    if (!state.showForm) { area.innerHTML = ''; return; }
+    var f = state.form;
+    area.innerHTML =
+      '<div class="recognized">' +
+        '<div class="recognized-head">' +
+          '<span class="recognized-flag">Распознано</span>' +
+          '<span class="hint">Проверьте поля и поправьте вручную</span>' +
+        '</div>' +
+        '<div class="form-grid">' +
+          field('Состав букета', 'text', 'f-bouquet', f.bouquet) +
+          field('Бюджет, ₸', 'text', 'f-budget', f.budget) +
+          field('Дата доставки', 'text', 'f-date', f.date) +
+          field('Адрес', 'text', 'f-address', f.address) +
+          field('Клиент', 'text', 'f-client', f.client) +
+          '<label class="field">Канал' +
+            '<select id="f-channel">' +
+              '<option value="WhatsApp"' + (f.channel === 'WhatsApp' ? ' selected' : '') + '>WhatsApp</option>' +
+              '<option value="Instagram"' + (f.channel === 'Instagram' ? ' selected' : '') + '>Instagram</option>' +
+            '</select>' +
+          '</label>' +
+        '</div>' +
+        '<div class="form-actions">' +
+          '<button type="button" id="createOrderBtn" class="btn-primary">Создать заказ</button>' +
+          '<button type="button" id="cancelFormBtn" class="btn-cancel">Отмена</button>' +
+        '</div>' +
+      '</div>';
+
+    function field(label, type, id, value){
+      return '<label class="field">' + esc(label) +
+        '<input type="' + type + '" id="' + id + '" value="' + esc(value) + '" placeholder="не указано">' +
+      '</label>';
+    }
+
+    ['bouquet','budget','date','address','client'].forEach(function(key){
+      var input = document.getElementById('f-' + key);
+      input.addEventListener('input', function(){ state.form[key] = input.value; });
+    });
+    document.getElementById('f-channel').addEventListener('change', function(e){ state.form.channel = e.target.value; });
+    document.getElementById('createOrderBtn').addEventListener('click', onCreateOrder);
+    document.getElementById('cancelFormBtn').addEventListener('click', function(){ state.showForm = false; renderRecognized(); });
+  }
+
+  function renderBoard(){
+    var board = document.getElementById('board');
+    if (!board) return;
+    board.innerHTML = STATUS_ORDER.map(function(key){
+      var st = STATUS[key];
+      var cards = state.orders.filter(function(o){ return o.status === key; });
+      return (
+        '<div class="column" data-col="' + key + '" style="--col-accent:' + st.color + '">' +
+          '<div class="column-head"><span class="col-dot"></span><h3>' + esc(st.title) + '</h3><span class="col-count">' + cards.length + '</span></div>' +
+          '<div class="col-body">' + cards.map(renderCard).join('') + '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  function renderCard(o){
+    var initial = esc((o.client || '?').charAt(0));
+    var channelClass = o.channel === 'WhatsApp' ? 'wa' : 'ig';
+    return (
+      '<article class="kcard" draggable="true" data-card-id="' + o.id + '">' +
+        '<div class="kcard-top">' +
+          '<p class="kcard-bouquet">' + esc(o.bouquet || 'не указано') + '</p>' +
+          '<span class="channel-badge ' + channelClass + '">' + esc(o.channel) + '</span>' +
+        '</div>' +
+        '<p class="kcard-price">' + (o.budget ? money(o.budget) : 'не указано') + '</p>' +
+        '<div class="kcard-meta">' +
+          '<span class="' + (o.date ? 'filled' : 'muted') + '">' + esc(o.date || 'дата не указана') + '</span>' +
+          '<span class="' + (o.address ? 'filled' : 'muted') + '">' + esc(o.address || 'адрес не указан') + '</span>' +
+        '</div>' +
+        '<div class="kcard-client">' +
+          '<span class="avatar">' + initial + '</span>' +
+          '<span class="' + (o.client ? 'client-name' : 'muted') + '">' + esc(o.client || 'клиент не указан') + '</span>' +
+        '</div>' +
+      '</article>'
+    );
+  }
+
+  function onRecognize(){
+    if (!state.chat.trim() || state.loading) return;
+    state.loading = true;
+    state.showForm = false;
+    renderOrdersTab();
+    var delay = 800 + Math.random() * 400;
+    setTimeout(function(){
+      state.loading = false;
+      state.showForm = true;
+      state.form = parseOrder(state.chat);
+      renderOrdersTab();
+    }, delay);
+  }
+
+  function onCreateOrder(){
+    var f = state.form;
+    var o = {
+      id: state.nextId++,
+      bouquet: f.bouquet, budget: parseInt(f.budget, 10) || 0,
+      date: f.date, address: f.address, client: f.client,
+      channel: f.channel, status: 'new', today: true
+    };
+    state.orders.push(o);
+    state.showForm = false;
+    state.chat = '';
+    state.form = { bouquet:'', budget:'', date:'', address:'', client:'', channel:'WhatsApp' };
+    renderOrdersTab();
+  }
+
+  /* drag & drop, delegated on the whole panel since #board is rebuilt often */
+  panel.addEventListener('dragstart', function(e){
+    var card = e.target.closest('[data-card-id]');
+    if (!card) return;
+    state.dragId = Number(card.getAttribute('data-card-id'));
+    e.dataTransfer.effectAllowed = 'move';
+    card.classList.add('dragging');
+  });
+  panel.addEventListener('dragend', function(e){
+    var card = e.target.closest('[data-card-id]');
+    if (card) card.classList.remove('dragging');
+    state.dragId = null;
+  });
+  panel.addEventListener('dragover', function(e){
+    var col = e.target.closest('[data-col]');
+    if (!col) return;
+    e.preventDefault();
+    col.classList.add('drag-over');
+  });
+  panel.addEventListener('dragleave', function(e){
+    var col = e.target.closest('[data-col]');
+    if (col) col.classList.remove('drag-over');
+  });
+  panel.addEventListener('drop', function(e){
+    var col = e.target.closest('[data-col]');
+    if (!col) return;
+    e.preventDefault();
+    col.classList.remove('drag-over');
+    if (state.dragId == null) return;
+    var status = col.getAttribute('data-col');
+    var order = state.orders.find(function(o){ return o.id === state.dragId; });
+    if (order) order.status = status;
+    state.dragId = null;
+    renderBoard();
+  });
+
+  /* ---------------- Clients tab ---------------- */
+  function renderClientsTab(){
+    panel.innerHTML =
+      '<section class="card-surface">' +
+        '<div class="panel-head-row"><h2>Клиенты</h2><button type="button" id="toggleClientFormBtn" class="btn-primary">Добавить клиента</button></div>' +
+        '<div id="clientFormArea"></div>' +
+        '<div class="table-wrap"><table>' +
+          '<thead><tr><th>Имя</th><th>Телефон</th><th class="num">Заказов</th></tr></thead>' +
+          '<tbody id="clientRows"></tbody>' +
+        '</table></div>' +
+      '</section>';
+
+    document.getElementById('toggleClientFormBtn').addEventListener('click', function(){
+      state.showClientForm = !state.showClientForm;
+      renderClientForm();
+    });
+    renderClientForm();
+    renderClientRows();
+  }
+
+  function renderClientForm(){
+    var area = document.getElementById('clientFormArea');
+    if (!area) return;
+    if (!state.showClientForm) { area.innerHTML = ''; return; }
+    area.innerHTML =
+      '<div class="add-form">' +
+        '<label class="field">Имя<input id="nc-name" placeholder="Имя клиента" value="' + esc(state.newClient.name) + '"></label>' +
+        '<label class="field">Телефон<input id="nc-phone" placeholder="+7 700 000 00 00" value="' + esc(state.newClient.phone) + '"></label>' +
+        '<button type="button" id="addClientBtn" class="btn-save">Сохранить</button>' +
+      '</div>';
+    document.getElementById('nc-name').addEventListener('input', function(e){ state.newClient.name = e.target.value; });
+    document.getElementById('nc-phone').addEventListener('input', function(e){ state.newClient.phone = e.target.value; });
+    document.getElementById('addClientBtn').addEventListener('click', function(){
+      var c = state.newClient;
+      if (!c.name.trim()) return;
+      state.clients.push({ name: c.name, phone: c.phone || '—', orders: 0 });
+      state.newClient = { name:'', phone:'' };
+      state.showClientForm = false;
+      renderClientForm();
+      renderClientRows();
+    });
+  }
+
+  function renderClientRows(){
+    var rows = document.getElementById('clientRows');
+    if (!rows) return;
+    rows.innerHTML = state.clients.map(function(c){
+      return '<tr><td>' + esc(c.name) + '</td><td class="phone-col">' + esc(c.phone) + '</td><td class="num orders-count">' + c.orders + '</td></tr>';
+    }).join('');
+  }
+
+  /* ---------------- Stock tab ---------------- */
+  function renderStockTab(){
+    panel.innerHTML =
+      '<section class="card-surface">' +
+        '<h2 style="margin-bottom:18px">Склад</h2>' +
+        '<div class="table-wrap"><table>' +
+          '<thead><tr><th>Цветок</th><th class="num">Остаток, шт.</th><th class="num">Изменить</th></tr></thead>' +
+          '<tbody id="stockRows"></tbody>' +
+        '</table></div>' +
+      '</section>';
+    renderStockRows();
+  }
+
+  function renderStockRows(){
+    var rows = document.getElementById('stockRows');
+    if (!rows) return;
+    rows.innerHTML = state.stock.map(function(s, i){
+      var low = s.qty < 10;
+      return (
+        '<tr class="' + (low ? 'low-row' : '') + '">' +
+          '<td><span class="stock-name">' + esc(s.name) + (low ? '<span class="low-badge">мало</span>' : '') + '</span></td>' +
+          '<td class="num qty-cell">' + s.qty + '</td>' +
+          '<td><div class="qty-btns">' +
+            '<button type="button" class="qty-btn" data-stock-dec="' + i + '">−</button>' +
+            '<button type="button" class="qty-btn" data-stock-inc="' + i + '">+</button>' +
+          '</div></td>' +
+        '</tr>'
+      );
+    }).join('');
+  }
+
+  panel.addEventListener('click', function(e){
+    var inc = e.target.closest('[data-stock-inc]');
+    var dec = e.target.closest('[data-stock-dec]');
+    if (inc) { bumpStock(Number(inc.getAttribute('data-stock-inc')), 1); }
+    else if (dec) { bumpStock(Number(dec.getAttribute('data-stock-dec')), -1); }
+  });
+  function bumpStock(index, delta){
+    var item = state.stock[index];
+    if (!item) return;
+    item.qty = Math.max(0, item.qty + delta);
+    renderStockRows();
+  }
+
+  /* ---------------- Writeoffs tab ---------------- */
+  var REASONS = ['брак','увял','сломался','рекламация'];
+  function renderWriteoffsTab(){
+    panel.innerHTML =
+      '<section class="panel-stack">' +
+        '<div class="card-surface">' +
+          '<h2 style="margin-bottom:16px">Новое списание</h2>' +
+          '<div class="wo-form">' +
+            '<label class="field">Цветок<select id="wo-flower">' +
+              state.stock.map(function(s){ return '<option value="' + esc(s.name) + '"' + (s.name === state.wo.flower ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join('') +
+            '</select></label>' +
+            '<label class="field qty">Количество<input type="number" min="1" id="wo-qty" value="' + state.wo.qty + '"></label>' +
+            '<label class="field">Причина<select id="wo-reason">' +
+              REASONS.map(function(r){ return '<option value="' + r + '"' + (r === state.wo.reason ? ' selected' : '') + '>' + r + '</option>'; }).join('') +
+            '</select></label>' +
+            '<button type="button" id="addWriteoffBtn" class="btn-primary">Списать</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="card-surface">' +
+          '<h2 style="margin-bottom:16px">История списаний</h2>' +
+          '<div class="table-wrap"><table>' +
+            '<thead><tr><th>Цветок</th><th class="num">Кол-во</th><th>Причина</th><th>Дата</th></tr></thead>' +
+            '<tbody id="writeoffRows"></tbody>' +
+          '</table></div>' +
+        '</div>' +
+      '</section>';
+
+    document.getElementById('wo-flower').addEventListener('change', function(e){ state.wo.flower = e.target.value; });
+    document.getElementById('wo-qty').addEventListener('input', function(e){ state.wo.qty = e.target.value; });
+    document.getElementById('wo-reason').addEventListener('change', function(e){ state.wo.reason = e.target.value; });
+    document.getElementById('addWriteoffBtn').addEventListener('click', onAddWriteoff);
+    renderWriteoffRows();
+  }
+
+  function renderWriteoffRows(){
+    var rows = document.getElementById('writeoffRows');
+    if (!rows) return;
+    rows.innerHTML = state.writeoffs.map(function(w){
+      return (
+        '<tr><td>' + esc(w.flower) + '</td><td class="num wo-qty">' + w.qty + '</td>' +
+        '<td><span class="reason-tag">' + esc(w.reason) + '</span></td><td class="phone-col">' + esc(w.date) + '</td></tr>'
+      );
+    }).join('');
+  }
+
+  function onAddWriteoff(){
+    var w = state.wo;
+    var qty = Math.max(1, parseInt(w.qty, 10) || 1);
+    state.writeoffs.unshift({ flower: w.flower, qty: qty, reason: w.reason, date: fmtDate(new Date()) });
+    var item = state.stock.find(function(s){ return s.name === w.flower; });
+    if (item) item.qty = Math.max(0, item.qty - qty);
+    state.wo = { flower: w.flower, qty: 1, reason: w.reason };
+    renderWriteoffsTab();
+  }
+
+  /* ---------------- Summary tab ---------------- */
+  function renderSummaryTab(){
+    var revenue = state.orders.reduce(function(a, o){ return a + (o.budget || 0); }, 0);
+    var todayCount = state.orders.filter(function(o){ return o.today; }).length;
+    var writtenOff = state.writeoffs.reduce(function(a, w){ return a + w.qty; }, 0);
+    var low = state.stock.filter(function(s){ return s.qty < 10; }).length;
+    var metrics = [
+      { label:'Заказов сегодня', value: String(todayCount), note:'принято за текущий день' },
+      { label:'Выручка за неделю', value: money(revenue), note:'сумма бюджетов всех заказов' },
+      { label:'Списано за месяц', value: writtenOff + ' шт.', note:'по всем причинам' },
+      { label:'Позиций с низким остатком', value: String(low), note:'остаток меньше 10 шт.' }
+    ];
+    panel.innerHTML =
+      '<section class="stat-grid">' +
+        metrics.map(function(m){
+          return (
+            '<div class="stat-card">' +
+              '<p class="stat-label">' + esc(m.label) + '</p>' +
+              '<p class="stat-value">' + esc(m.value) + '</p>' +
+              '<p class="stat-note">' + esc(m.note) + '</p>' +
+            '</div>'
+          );
+        }).join('') +
+      '</section>';
+  }
+
+  /* ---------------- boot ---------------- */
+  renderTabs();
+  renderPanel();
+})();
+</script>
+</body>
+</html>
