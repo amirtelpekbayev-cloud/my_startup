@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Florify — Переписка превращается в заказ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14141C;
+    --bg-alt: #1B1B26;
+    --text: #F5F5F7;
+    --text-muted: #9B9BA8;
+    --accent: #6C63FF;
+    --accent-dim: rgba(108,99,255,.14);
+    --border: rgba(245,245,247,.12);
+    --ease: cubic-bezier(.4,0,.2,1);
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{ color:inherit; text-decoration:none; }
+  ul{ list-style:none; margin:0; padding:0; }
+  button{ font-family:inherit; cursor:pointer; }
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding-inline:24px;
+  }
+  .eyebrow{
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+  }
+
+  /* ---------- reveal-on-scroll ---------- */
+  .reveal{
+    opacity:0;
+    transform:translateY(16px);
+    transition:opacity .6s var(--ease), transform .6s var(--ease);
+  }
+  .reveal.in-view{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:13px 26px;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    border:1.5px solid var(--accent);
+    color:var(--text);
+    background:transparent;
+    transition:background-color .18s var(--ease), border-color .18s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease);
+  }
+  .btn:hover{
+    background:var(--accent-dim);
+    border-color:var(--accent);
+    transform:scale(1.02);
+  }
+  .btn:active{ transform:scale(.99); }
+  .btn-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    color:var(--text-muted);
+    font-size:15px;
+    font-weight:500;
+    padding:13px 4px;
+    border:none;
+    background:none;
+    transition:color .18s var(--ease), gap .18s var(--ease);
+  }
+  .btn-link:hover{ color:var(--text); gap:10px; }
+  .btn-ghost{
+    border:1px solid var(--border);
+  }
+  .btn-ghost:hover{
+    border-color:var(--accent);
+    background:var(--accent-dim);
+    transform:scale(1.02);
+  }
+
+  /* ---------- nav ---------- */
+  .nav{
+    position:sticky;
+    top:0;
+    z-index:50;
+    background:rgba(20,20,28,.82);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav .wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    height:72px;
+  }
+  .logo{
+    font-size:19px;
+    font-weight:800;
+    letter-spacing:-.01em;
+  }
+  .nav-links{
+    display:flex;
+    gap:36px;
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+  }
+  .nav-links a{
+    font-size:14.5px;
+    font-weight:500;
+    color:var(--text-muted);
+    transition:color .18s var(--ease);
+  }
+  .nav-links a:hover{ color:var(--text); }
+  .nav-actions{
+    display:flex;
+    align-items:center;
+    gap:20px;
+  }
+  .nav-actions .signin{
+    font-size:14.5px;
+    font-weight:500;
+    color:var(--text-muted);
+    transition:color .18s var(--ease);
+  }
+  .nav-actions .signin:hover{ color:var(--text); }
+  .nav-actions .btn{ padding:10px 20px; font-size:14px; }
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding:96px 0 88px;
+  }
+  .hero .wrap{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:64px;
+    align-items:center;
+  }
+  .hero-copy > *{
+    opacity:0;
+    transform:translateY(12px);
+  }
+  .hero.run .hero-copy > *{
+    animation:fadeUp .6s var(--ease) forwards;
+  }
+  .hero.run .hero-eyebrow{ animation-delay:0ms; }
+  .hero.run .hero-title{ animation-delay:100ms; }
+  .hero.run .hero-subtitle{ animation-delay:200ms; }
+  .hero.run .hero-actions{ animation-delay:300ms; }
+  @keyframes fadeUp{
+    from{ opacity:0; transform:translateY(12px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @keyframes scaleFadeIn{
+    from{ opacity:0; transform:scale(.98); }
+    to{ opacity:1; transform:scale(1); }
+  }
+  .hero-eyebrow{ margin-bottom:18px; }
+  .hero-title{
+    font-size:clamp(34px, 4.6vw, 54px);
+    font-weight:800;
+    letter-spacing:-.02em;
+    line-height:1.12;
+    margin:0 0 22px;
+  }
+  .hero-subtitle{
+    font-size:17px;
+    color:var(--text-muted);
+    max-width:520px;
+    margin:0 0 34px;
+  }
+  .hero-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .hero-visual{
+    aspect-ratio:4/5;
+    border:1.5px dashed var(--border);
+    border-radius:20px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    color:var(--text-muted);
+    background:linear-gradient(160deg, rgba(108,99,255,.06), transparent 60%);
+    opacity:0;
+    transform:scale(.98);
+  }
+  .hero.run .hero-visual{
+    animation:scaleFadeIn .7s var(--ease) forwards;
+    animation-delay:150ms;
+  }
+  .hero-visual svg{ width:44px; height:44px; opacity:.7; }
+  .hero-visual span{
+    font-size:13px;
+    font-weight:500;
+    text-align:center;
+    padding:0 24px;
+  }
+
+  /* ---------- social proof ---------- */
+  .social-proof{
+    background:var(--bg-alt);
+    padding:52px 0;
+    border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+  }
+  .social-proof p{
+    text-align:center;
+    font-size:14px;
+    color:var(--text-muted);
+    margin:0 0 32px;
+  }
+  .logo-row{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:56px;
+    flex-wrap:wrap;
+  }
+  .logo-row span{
+    font-size:17px;
+    font-weight:700;
+    color:var(--text-muted);
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity .5s var(--ease), transform .5s var(--ease);
+  }
+  .logo-row span.visible{
+    opacity:.85;
+    transform:translateY(0);
+  }
+
+  /* ---------- how it works ---------- */
+  .how{
+    padding:112px 0;
+  }
+  .how-head{
+    text-align:center;
+    max-width:640px;
+    margin:0 auto 64px;
+  }
+  .how-head .eyebrow{ display:block; margin-bottom:14px; }
+  .how-head h2{
+    font-size:clamp(28px, 3.4vw, 40px);
+    font-weight:800;
+    letter-spacing:-.02em;
+    margin:0;
+  }
+  .how-grid{
+    display:grid;
+    grid-template-columns:300px 1fr;
+    gap:48px;
+    align-items:start;
+  }
+  .tabs-list{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .tabs-indicator{
+    position:absolute;
+    top:0; left:0;
+    background:var(--accent-dim);
+    border:1px solid rgba(108,99,255,.35);
+    border-radius:12px;
+    transition:transform .25s var(--ease), width .25s var(--ease), height .25s var(--ease);
+    pointer-events:none;
+    z-index:0;
+  }
+  .tab-btn{
+    position:relative;
+    z-index:1;
+    text-align:left;
+    background:none;
+    border:none;
+    border-radius:12px;
+    padding:18px 20px;
+    font-size:15.5px;
+    font-weight:600;
+    color:var(--text-muted);
+    transition:color .2s var(--ease);
+    white-space:nowrap;
+  }
+  .tab-btn .num{
+    color:var(--text-muted);
+    margin-right:6px;
+    font-weight:700;
+    transition:color .2s var(--ease);
+  }
+  .tab-btn.active{ color:var(--text); }
+  .tab-btn.active .num{ color:var(--accent); }
+
+  .how-panel{
+    background:var(--bg-alt);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:44px;
+    min-height:340px;
+  }
+  .how-panel-inner{
+    opacity:1;
+    transform:translateY(0);
+    transition:opacity .15s var(--ease), transform .15s var(--ease);
+  }
+  .how-panel-inner.switching{
+    opacity:0;
+    transform:translateY(8px);
+  }
+  .how-panel-inner h3{
+    font-size:23px;
+    font-weight:700;
+    letter-spacing:-.01em;
+    margin:0 0 16px;
+  }
+  .how-panel-inner p{
+    font-size:15.5px;
+    color:var(--text-muted);
+    max-width:560px;
+    margin:0 0 28px;
+  }
+  .how-placeholder{
+    border:1.5px dashed var(--border);
+    border-radius:14px;
+    padding:36px 20px;
+    text-align:center;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.1em;
+    color:var(--text-muted);
+    background:rgba(108,99,255,.04);
+  }
+
+  /* ---------- footer ---------- */
+  footer{
+    padding:40px 0;
+    border-top:1px solid var(--border);
+    text-align:center;
+  }
+  footer p{
+    color:var(--text-muted);
+    font-size:13.5px;
+    margin:0;
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 860px){
+    .nav-links{ display:none; }
+    .hero .wrap{
+      grid-template-columns:1fr;
+      gap:40px;
+    }
+    .hero{ padding:56px 0 56px; }
+    .hero-visual{ order:-1; aspect-ratio:16/9; }
+    .how-grid{ grid-template-columns:1fr; }
+    .tabs-list{
+      flex-direction:row;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+      padding-bottom:6px;
+      scrollbar-width:thin;
+    }
+    .tab-btn{
+      flex:0 0 auto;
+      min-width:190px;
+    }
+    .how-panel{ padding:28px; }
+    .logo-row{ gap:28px 36px; }
+  }
+  @media (max-width: 520px){
+    .wrap{ padding-inline:18px; }
+    .hero-actions{ flex-direction:column; align-items:stretch; }
+    .btn, .btn-link{ width:100%; }
+    .btn-link{ justify-content:center; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="logo" href="#">Florify</a>
+    <nav class="nav-links">
+      <a href="#how">Как работает</a>
+      <a href="#integrations">Интеграции</a>
+      <a href="#faq">Вопросы</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="signin" href="#">Войти</a>
+      <a class="btn btn-ghost" href="#demo">Подключить магазин</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <p class="eyebrow hero-eyebrow">ПРИЁМ ЗАКАЗОВ ДЛЯ ЦВЕТОЧНЫХ МАГАЗИНОВ</p>
+        <h1 class="hero-title">Переписка<br>превращается<br>в заказ</h1>
+        <p class="hero-subtitle">Florify читает сообщения из WhatsApp и Instagram, достаёт состав букета, бюджет, адрес и время доставки — и ставит заказ на доску. Флорист подтверждает, а не перепечатывает.</p>
+        <div class="hero-actions">
+          <a class="btn" href="#demo">Запросить демо</a>
+          <a class="btn-link" href="#how">Посмотреть, как работает →</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="4" width="18" height="16" rx="2"/>
+          <circle cx="8.5" cy="9.5" r="1.5"/>
+          <path d="M3 16l5-5 4 4 3-3 6 6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Тёмное фото цветочной мастерской</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="social-proof reveal">
+    <div class="wrap">
+      <p>С Florify работают 340 магазинов и студий флористики</p>
+      <div class="logo-row">
+        <span>Айва</span>
+        <span>Botanica</span>
+        <span>Пион &amp; Co</span>
+        <span>Зелёный цех</span>
+        <span>Florarium</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="how reveal" id="how">
+    <div class="wrap">
+      <div class="how-head">
+        <span class="eyebrow">КАК РАБОТАЕТ</span>
+        <h2>Три шага от сообщения до собранного букета</h2>
+      </div>
+
+      <div class="how-grid">
+        <div class="tabs-list" id="tabsList">
+          <div class="tabs-indicator" id="tabsIndicator"></div>
+          <button class="tab-btn active" data-index="0"><span class="num">01</span>Разбор переписки</button>
+          <button class="tab-btn" data-index="1"><span class="num">02</span>Доска заказов</button>
+          <button class="tab-btn" data-index="2"><span class="num">03</span>Склад и списания</button>
+        </div>
+
+        <div class="how-panel">
+          <div class="how-panel-inner" id="howPanel">
+            <h3 id="howTitle">Сообщение разбирается на поля</h3>
+            <p id="howText">Клиент пишет как умеет — голосом, в три сообщения, с исправлениями. Florify собирает из этого состав букета, бюджет, адрес, дату и имя. Чего в переписке не было, остаётся пустым: угадывать адрес опаснее, чем спросить.</p>
+            <div class="how-placeholder" id="howCaption">РАЗБОР СООБЩЕНИЯ КЛИЕНТА</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>© 2026 Florify</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- hero load-in animation ---------- */
+  var hero = document.getElementById('hero');
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      hero.classList.add('run');
+    });
+  });
+
+  /* ---------- generic reveal-on-scroll ---------- */
+  var revealEls = document.querySelectorAll('.reveal');
+  var revealObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('in-view');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  revealEls.forEach(function(el){ revealObserver.observe(el); });
+
+  /* ---------- client logos stagger ---------- */
+  var logoRow = document.querySelector('.logo-row');
+  if(logoRow){
+    var logoObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          var items = entry.target.querySelectorAll('span');
+          items.forEach(function(item, i){
+            setTimeout(function(){ item.classList.add('visible'); }, i * 80);
+          });
+          logoObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    logoObserver.observe(logoRow);
+  }
+
+  /* ---------- how-it-works tabs ---------- */
+  var panels = [
+    {
+      title: 'Сообщение разбирается на поля',
+      text: 'Клиент пишет как умеет — голосом, в три сообщения, с исправлениями. Florify собирает из этого состав букета, бюджет, адрес, дату и имя. Чего в переписке не было, остаётся пустым: угадывать адрес опаснее, чем спросить.',
+      caption: 'РАЗБОР СООБЩЕНИЯ КЛИЕНТА'
+    },
+    {
+      title: 'Карточка сама встаёт в нужную колонку',
+      text: 'Заказ появляется в колонке «Новый». Дальше флорист сам двигает его: в сборке, у курьера, доставлено — Florify нигде не решает за него.',
+      caption: 'КАНБАН-ДОСКА ЗАКАЗОВ'
+    },
+    {
+      title: 'Остатки обновляются без лишней тетради',
+      text: 'Списание при браке или порче фиксируется в два клика — с причиной. Florify показывает, чего на складе стало мало, до того как это заметит клиент.',
+      caption: 'СКЛАД И СПИСАНИЯ'
+    }
+  ];
+
+  var tabsList = document.getElementById('tabsList');
+  var indicator = document.getElementById('tabsIndicator');
+  var tabButtons = Array.prototype.slice.call(tabsList.querySelectorAll('.tab-btn'));
+  var panelInner = document.getElementById('howPanel');
+  var howTitle = document.getElementById('howTitle');
+  var howText = document.getElementById('howText');
+  var howCaption = document.getElementById('howCaption');
+  var activeIndex = 0;
+  var switching = false;
+
+  function positionIndicator(animate){
+    var btn = tabButtons[activeIndex];
+    var listRect = tabsList.getBoundingClientRect();
+    var btnRect = btn.getBoundingClientRect();
+    var x = (btnRect.left - listRect.left) + tabsList.scrollLeft;
+    var y = (btnRect.top - listRect.top) + tabsList.scrollTop;
+
+    if(!animate){ indicator.style.transition = 'none'; }
+    indicator.style.width = btnRect.width + 'px';
+    indicator.style.height = btnRect.height + 'px';
+    indicator.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+
+    if(!animate){
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ indicator.style.transition = ''; });
+      });
+    }
+  }
+
+  function setActive(index){
+    if(index === activeIndex || switching) return;
+    switching = true;
+
+    tabButtons.forEach(function(btn){ btn.classList.remove('active'); });
+    tabButtons[index].classList.add('active');
+    activeIndex = index;
+    positionIndicator(true);
+    tabButtons[index].scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+
+    panelInner.classList.add('switching');
+    setTimeout(function(){
+      var data = panels[index];
+      howTitle.textContent = data.title;
+      howText.textContent = data.text;
+      howCaption.textContent = data.caption;
+      panelInner.classList.remove('switching');
+      switching = false;
+    }, 150);
+  }
+
+  tabButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      setActive(parseInt(btn.getAttribute('data-index'), 10));
+    });
+  });
+
+  window.addEventListener('load', function(){ positionIndicator(false); });
+  window.addEventListener('resize', function(){ positionIndicator(false); });
+  positionIndicator(false);
+
+})();
+</script>
+
+</body>
+</html>
