@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --cream:#ECE2D0;
@@ -182,7 +183,6 @@ tr.low-row{background:#FDF3E3}
       <h1>Florify</h1>
       <p>AI-ассистент приёма заказов для цветочного магазина</p>
     </div>
-    <div class="demo-pill"><span class="demo-dot"></span>Демо-режим · данные в памяти</div>
   </header>
 
   <nav class="tabs" id="tabs"></nav>
@@ -206,7 +206,6 @@ tr.low-row{background:#FDF3E3}
   var TABS = [['orders','Заказы'],['clients','Клиенты'],['stock','Склад'],['writeoffs','Списания'],['summary','Сводка']];
 
   function fmtDate(d){ return d.getDate() + ' ' + MONTHS[d.getMonth()]; }
-  function day(offset){ var d = new Date(); d.setDate(d.getDate() + offset); return fmtDate(d); }
   function money(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₸'; }
   function esc(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
@@ -216,7 +215,7 @@ tr.low-row{background:#FDF3E3}
 
   function parseOrder(text){
     var t = text.toLowerCase();
-    var out = { bouquet:'', budget:'', date:'', address:'', client:'', channel:'WhatsApp' };
+    var out = { bouquet:'', budget:'', date:'', address:'', client:'', phone:'', channel:'WhatsApp' };
 
     var m = t.match(/(?:бюджет|до|около|за)?\s*([0-9][0-9\s]{2,8})\s*(?:тг|тенге|₸|k|тыс)/);
     if (!m) m = t.match(/бюджет[^0-9]{0,12}([0-9][0-9\s]{2,8})/);
@@ -245,52 +244,46 @@ tr.low-row{background:#FDF3E3}
     var nm = text.match(/(?:зовут|это|я\s+—?|меня)\s+([А-ЯЁ][а-яё]+)/) || text.match(/(?:зовут|имя)[:\s]+([а-яё]+)/i);
     if (nm) out.client = nm[1].charAt(0).toUpperCase() + nm[1].slice(1);
 
+    var pm = text.match(/(\+?7|8)[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}/);
+    if (pm) out.phone = pm[0].trim();
+
     if (/инстаграм|instagram|директ|direct/i.test(text)) out.channel = 'Instagram';
     return out;
   }
 
-  /* ---------------- state ---------------- */
+  /* ---------------- Supabase ---------------- */
+  var sb = null;
+
+  /* ---------------- local UI state (данные экранов живут в Supabase, не здесь) ---------------- */
   var state = {
     tab: 'orders',
     chat: '',
     loading: false,
     showForm: false,
-    form: { bouquet:'', budget:'', date:'', address:'', client:'', channel:'WhatsApp' },
+    form: { bouquet:'', budget:'', date:'', address:'', client:'', phone:'', channel:'WhatsApp' },
     dragId: null,
-    nextId: 6,
-    orders: [
-      { id:1, bouquet:'Пионы розовые, 15 шт.', budget:28000, date: day(0) + ', 14:00', address:'ул. Абая 150, кв. 12', client:'Айгуль Сарсенова', channel:'WhatsApp', status:'new', today:true },
-      { id:2, bouquet:'Розы кремовые, 25 шт.', budget:45000, date: day(0) + ', 18:30', address:'мкр. Самал-2, д. 33', client:'Данияр Ким', channel:'Instagram', status:'new', today:true },
-      { id:3, bouquet:'Тюльпаны микс, 51 шт.', budget:19500, date: day(1) + ', 10:00', address:'ул. Толе би 59', client:'Мадина Оспанова', channel:'WhatsApp', status:'build', today:false },
-      { id:4, bouquet:'Хризантемы с эвкалиптом', budget:22000, date: day(0) + ', 16:00', address:'ул. Жандосова 8', client:'Ержан Абдиров', channel:'Instagram', status:'courier', today:true },
-      { id:5, bouquet:'Орхидея в кашпо', budget:36000, date: day(-1) + ', 12:00', address:'мкр. Аксай-3, д. 4', client:'Сауле Ким', channel:'WhatsApp', status:'done', today:false }
-    ],
-    clients: [
-      { name:'Айгуль Сарсенова', phone:'+7 701 234 55 10', orders:6 },
-      { name:'Данияр Ким', phone:'+7 705 880 12 04', orders:3 },
-      { name:'Мадина Оспанова', phone:'+7 747 301 77 22', orders:9 },
-      { name:'Ержан Абдиров', phone:'+7 702 445 19 38', orders:2 },
-      { name:'Сауле Ким', phone:'+7 708 612 90 41', orders:5 }
-    ],
+    orders: [],
+    clients: [],
     showClientForm: false,
     newClient: { name:'', phone:'' },
-    stock: [
-      { name:'Пионы', qty:24 }, { name:'Розы красные', qty:60 },
-      { name:'Розы кремовые', qty:8 }, { name:'Тюльпаны', qty:45 },
-      { name:'Хризантемы', qty:12 }, { name:'Орхидеи', qty:6 },
-      { name:'Лилии', qty:18 }, { name:'Эвкалипт', qty:9 }
-    ],
-    wo: { flower:'Пионы', qty:1, reason:'брак' },
-    writeoffs: [
-      { flower:'Розы кремовые', qty:5, reason:'увял', date: day(-1) },
-      { flower:'Пионы', qty:3, reason:'брак', date: day(-2) },
-      { flower:'Тюльпаны', qty:7, reason:'сломался', date: day(-4) },
-      { flower:'Орхидеи', qty:2, reason:'рекламация', date: day(-6) }
-    ]
+    inventory: [],
+    wo: { flower:'', qty:1, reason:'брак' },
+    writeoffs: []
   };
 
   var panel = document.getElementById('panel');
   var tabsEl = document.getElementById('tabs');
+
+  function showError(err, area){
+    var target = (area && document.getElementById(area)) || panel;
+    console.error(err);
+    var msg = 'Не удалось загрузить данные: ' + esc(err && err.message ? err.message : String(err));
+    if (target.tagName === 'TBODY') {
+      target.innerHTML = '<tr><td colspan="6" class="hint">' + msg + '</td></tr>';
+    } else {
+      target.innerHTML = '<section class="card-surface"><h2>Не удалось загрузить данные</h2><p class="hint">' + msg + '</p></section>';
+    }
+  }
 
   /* ---------------- tabs ---------------- */
   function renderTabs(){
@@ -331,7 +324,7 @@ tr.low-row{background:#FDF3E3}
           '</div>' +
           '<div id="recognizedArea"></div>' +
         '</div>' +
-        '<div class="board" id="board"></div>' +
+        '<div class="board" id="board"><p class="hint">Загрузка заказов…</p></div>' +
       '</section>';
 
     var chatInput = document.getElementById('chatInput');
@@ -343,7 +336,19 @@ tr.low-row{background:#FDF3E3}
     recognizeBtn.addEventListener('click', onRecognize);
 
     renderRecognized();
-    renderBoard();
+    loadOrders();
+  }
+
+  async function loadOrders(){
+    var board = document.getElementById('board');
+    try {
+      var res = await sb.from('orders').select('*').order('created_at', { ascending: false });
+      if (res.error) throw res.error;
+      state.orders = res.data || [];
+      renderBoard();
+    } catch (err) {
+      if (board) showError(err, 'board');
+    }
   }
 
   function renderRecognized(){
@@ -363,6 +368,7 @@ tr.low-row{background:#FDF3E3}
           field('Дата доставки', 'text', 'f-date', f.date) +
           field('Адрес', 'text', 'f-address', f.address) +
           field('Клиент', 'text', 'f-client', f.client) +
+          field('Телефон клиента', 'text', 'f-phone', f.phone) +
           '<label class="field">Канал' +
             '<select id="f-channel">' +
               '<option value="WhatsApp"' + (f.channel === 'WhatsApp' ? ' selected' : '') + '>WhatsApp</option>' +
@@ -382,7 +388,7 @@ tr.low-row{background:#FDF3E3}
       '</label>';
     }
 
-    ['bouquet','budget','date','address','client'].forEach(function(key){
+    ['bouquet','budget','date','address','client','phone'].forEach(function(key){
       var input = document.getElementById('f-' + key);
       input.addEventListener('input', function(){ state.form[key] = input.value; });
     });
@@ -407,22 +413,22 @@ tr.low-row{background:#FDF3E3}
   }
 
   function renderCard(o){
-    var initial = esc((o.client || '?').charAt(0));
+    var initial = esc((o.client_name || '?').charAt(0));
     var channelClass = o.channel === 'WhatsApp' ? 'wa' : 'ig';
     return (
       '<article class="kcard" draggable="true" data-card-id="' + o.id + '">' +
         '<div class="kcard-top">' +
-          '<p class="kcard-bouquet">' + esc(o.bouquet || 'не указано') + '</p>' +
+          '<p class="kcard-bouquet">' + esc(o.flowers || 'не указано') + '</p>' +
           '<span class="channel-badge ' + channelClass + '">' + esc(o.channel) + '</span>' +
         '</div>' +
         '<p class="kcard-price">' + (o.budget ? money(o.budget) : 'не указано') + '</p>' +
         '<div class="kcard-meta">' +
-          '<span class="' + (o.date ? 'filled' : 'muted') + '">' + esc(o.date || 'дата не указана') + '</span>' +
+          '<span class="' + (o.delivery_date ? 'filled' : 'muted') + '">' + esc(o.delivery_date || 'дата не указана') + '</span>' +
           '<span class="' + (o.address ? 'filled' : 'muted') + '">' + esc(o.address || 'адрес не указан') + '</span>' +
         '</div>' +
         '<div class="kcard-client">' +
           '<span class="avatar">' + initial + '</span>' +
-          '<span class="' + (o.client ? 'client-name' : 'muted') + '">' + esc(o.client || 'клиент не указан') + '</span>' +
+          '<span class="' + (o.client_name ? 'client-name' : 'muted') + '">' + esc(o.client_name || 'клиент не указан') + '</span>' +
         '</div>' +
       '</article>'
     );
@@ -442,19 +448,31 @@ tr.low-row{background:#FDF3E3}
     }, delay);
   }
 
-  function onCreateOrder(){
+  async function onCreateOrder(){
     var f = state.form;
-    var o = {
-      id: state.nextId++,
-      bouquet: f.bouquet, budget: parseInt(f.budget, 10) || 0,
-      date: f.date, address: f.address, client: f.client,
-      channel: f.channel, status: 'new', today: true
+    var payload = {
+      flowers: f.bouquet || null,
+      budget: parseInt(f.budget, 10) || 0,
+      delivery_date: f.date || null,
+      address: f.address || null,
+      client_name: f.client || null,
+      client_phone: f.phone || null,
+      channel: f.channel,
+      status: 'new'
     };
-    state.orders.push(o);
-    state.showForm = false;
-    state.chat = '';
-    state.form = { bouquet:'', budget:'', date:'', address:'', client:'', channel:'WhatsApp' };
-    renderOrdersTab();
+    var btn = document.getElementById('createOrderBtn');
+    if (btn) btn.setAttribute('disabled', 'disabled');
+    try {
+      var res = await sb.from('orders').insert(payload);
+      if (res.error) throw res.error;
+      state.showForm = false;
+      state.chat = '';
+      state.form = { bouquet:'', budget:'', date:'', address:'', client:'', phone:'', channel:'WhatsApp' };
+      renderOrdersTab();
+    } catch (err) {
+      if (btn) btn.removeAttribute('disabled');
+      alert('Не удалось создать заказ: ' + (err.message || err));
+    }
   }
 
   /* drag & drop, delegated on the whole panel since #board is rebuilt often */
@@ -480,17 +498,29 @@ tr.low-row{background:#FDF3E3}
     var col = e.target.closest('[data-col]');
     if (col) col.classList.remove('drag-over');
   });
-  panel.addEventListener('drop', function(e){
+  panel.addEventListener('drop', async function(e){
     var col = e.target.closest('[data-col]');
     if (!col) return;
     e.preventDefault();
     col.classList.remove('drag-over');
     if (state.dragId == null) return;
     var status = col.getAttribute('data-col');
-    var order = state.orders.find(function(o){ return o.id === state.dragId; });
-    if (order) order.status = status;
+    var orderId = state.dragId;
     state.dragId = null;
+    var order = state.orders.find(function(o){ return o.id === orderId; });
+    if (!order) return;
+    var prevStatus = order.status;
+    if (prevStatus === status) return;
+    order.status = status;
     renderBoard();
+    try {
+      var res = await sb.from('orders').update({ status: status }).eq('id', orderId);
+      if (res.error) throw res.error;
+    } catch (err) {
+      order.status = prevStatus;
+      renderBoard();
+      alert('Не удалось обновить статус заказа: ' + (err.message || err));
+    }
   });
 
   /* ---------------- Clients tab ---------------- */
@@ -501,7 +531,7 @@ tr.low-row{background:#FDF3E3}
         '<div id="clientFormArea"></div>' +
         '<div class="table-wrap"><table>' +
           '<thead><tr><th>Имя</th><th>Телефон</th><th class="num">Заказов</th></tr></thead>' +
-          '<tbody id="clientRows"></tbody>' +
+          '<tbody id="clientRows"><tr><td colspan="3" class="hint">Загрузка…</td></tr></tbody>' +
         '</table></div>' +
       '</section>';
 
@@ -510,7 +540,29 @@ tr.low-row{background:#FDF3E3}
       renderClientForm();
     });
     renderClientForm();
-    renderClientRows();
+    loadClients();
+  }
+
+  async function loadClients(){
+    try {
+      var results = await Promise.all([
+        sb.from('clients').select('*').order('created_at', { ascending: false }),
+        sb.from('orders').select('client_phone')
+      ]);
+      if (results[0].error) throw results[0].error;
+      if (results[1].error) throw results[1].error;
+      var counts = {};
+      (results[1].data || []).forEach(function(o){
+        if (o.client_phone) counts[o.client_phone] = (counts[o.client_phone] || 0) + 1;
+      });
+      state.clients = (results[0].data || []).map(function(c){
+        var ordersCount = c.phone ? (counts[c.phone] || 0) : 0;
+        return Object.assign({}, c, { ordersCount: ordersCount });
+      });
+      renderClientRows();
+    } catch (err) {
+      showError(err, 'clientRows');
+    }
   }
 
   function renderClientForm(){
@@ -525,22 +577,31 @@ tr.low-row{background:#FDF3E3}
       '</div>';
     document.getElementById('nc-name').addEventListener('input', function(e){ state.newClient.name = e.target.value; });
     document.getElementById('nc-phone').addEventListener('input', function(e){ state.newClient.phone = e.target.value; });
-    document.getElementById('addClientBtn').addEventListener('click', function(){
+    document.getElementById('addClientBtn').addEventListener('click', async function(){
       var c = state.newClient;
       if (!c.name.trim()) return;
-      state.clients.push({ name: c.name, phone: c.phone || '—', orders: 0 });
-      state.newClient = { name:'', phone:'' };
-      state.showClientForm = false;
-      renderClientForm();
-      renderClientRows();
+      var btn = document.getElementById('addClientBtn');
+      btn.setAttribute('disabled', 'disabled');
+      try {
+        var res = await sb.from('clients').insert({ name: c.name, phone: c.phone || null });
+        if (res.error) throw res.error;
+        state.newClient = { name:'', phone:'' };
+        state.showClientForm = false;
+        renderClientForm();
+        loadClients();
+      } catch (err) {
+        btn.removeAttribute('disabled');
+        alert('Не удалось добавить клиента: ' + (err.message || err));
+      }
     });
   }
 
   function renderClientRows(){
     var rows = document.getElementById('clientRows');
     if (!rows) return;
+    if (!state.clients.length) { rows.innerHTML = '<tr><td colspan="3" class="hint">Клиентов пока нет</td></tr>'; return; }
     rows.innerHTML = state.clients.map(function(c){
-      return '<tr><td>' + esc(c.name) + '</td><td class="phone-col">' + esc(c.phone) + '</td><td class="num orders-count">' + c.orders + '</td></tr>';
+      return '<tr><td>' + esc(c.name) + '</td><td class="phone-col">' + esc(c.phone || '—') + '</td><td class="num orders-count">' + c.ordersCount + '</td></tr>';
     }).join('');
   }
 
@@ -551,24 +612,36 @@ tr.low-row{background:#FDF3E3}
         '<h2 style="margin-bottom:18px">Склад</h2>' +
         '<div class="table-wrap"><table>' +
           '<thead><tr><th>Цветок</th><th class="num">Остаток, шт.</th><th class="num">Изменить</th></tr></thead>' +
-          '<tbody id="stockRows"></tbody>' +
+          '<tbody id="stockRows"><tr><td colspan="3" class="hint">Загрузка…</td></tr></tbody>' +
         '</table></div>' +
       '</section>';
-    renderStockRows();
+    loadInventory();
+  }
+
+  async function loadInventory(){
+    try {
+      var res = await sb.from('inventory').select('*').order('flower_name');
+      if (res.error) throw res.error;
+      state.inventory = res.data || [];
+      renderStockRows();
+    } catch (err) {
+      showError(err, 'stockRows');
+    }
   }
 
   function renderStockRows(){
     var rows = document.getElementById('stockRows');
     if (!rows) return;
-    rows.innerHTML = state.stock.map(function(s, i){
-      var low = s.qty < 10;
+    if (!state.inventory.length) { rows.innerHTML = '<tr><td colspan="3" class="hint">Склад пуст</td></tr>'; return; }
+    rows.innerHTML = state.inventory.map(function(s){
+      var low = s.quantity < 10;
       return (
         '<tr class="' + (low ? 'low-row' : '') + '">' +
-          '<td><span class="stock-name">' + esc(s.name) + (low ? '<span class="low-badge">мало</span>' : '') + '</span></td>' +
-          '<td class="num qty-cell">' + s.qty + '</td>' +
+          '<td><span class="stock-name">' + esc(s.flower_name) + (low ? '<span class="low-badge">мало</span>' : '') + '</span></td>' +
+          '<td class="num qty-cell">' + s.quantity + '</td>' +
           '<td><div class="qty-btns">' +
-            '<button type="button" class="qty-btn" data-stock-dec="' + i + '">−</button>' +
-            '<button type="button" class="qty-btn" data-stock-inc="' + i + '">+</button>' +
+            '<button type="button" class="qty-btn" data-stock-dec="' + s.id + '">−</button>' +
+            '<button type="button" class="qty-btn" data-stock-inc="' + s.id + '">+</button>' +
           '</div></td>' +
         '</tr>'
       );
@@ -581,29 +654,65 @@ tr.low-row{background:#FDF3E3}
     if (inc) { bumpStock(Number(inc.getAttribute('data-stock-inc')), 1); }
     else if (dec) { bumpStock(Number(dec.getAttribute('data-stock-dec')), -1); }
   });
-  function bumpStock(index, delta){
-    var item = state.stock[index];
+  async function bumpStock(id, delta){
+    var item = state.inventory.find(function(s){ return s.id === id; });
     if (!item) return;
-    item.qty = Math.max(0, item.qty + delta);
+    var prevQty = item.quantity;
+    var newQty = Math.max(0, prevQty + delta);
+    item.quantity = newQty;
     renderStockRows();
+    try {
+      var res = await sb.from('inventory').update({ quantity: newQty }).eq('id', id);
+      if (res.error) throw res.error;
+    } catch (err) {
+      item.quantity = prevQty;
+      renderStockRows();
+      alert('Не удалось обновить остаток: ' + (err.message || err));
+    }
   }
 
   /* ---------------- Writeoffs tab ---------------- */
   var REASONS = ['брак','увял','сломался','рекламация'];
   function renderWriteoffsTab(){
+    panel.innerHTML = '<section class="panel-stack"><div class="card-surface"><p class="hint">Загрузка…</p></div></section>';
+    loadWriteoffsTabData();
+  }
+
+  async function loadWriteoffsTabData(){
+    try {
+      var results = await Promise.all([
+        sb.from('inventory').select('*').order('flower_name'),
+        sb.from('write_offs').select('*').order('created_at', { ascending: false })
+      ]);
+      if (results[0].error) throw results[0].error;
+      if (results[1].error) throw results[1].error;
+      state.inventory = results[0].data || [];
+      state.writeoffs = results[1].data || [];
+      if (!state.wo.flower || !state.inventory.some(function(s){ return s.flower_name === state.wo.flower; })) {
+        state.wo.flower = state.inventory.length ? state.inventory[0].flower_name : '';
+      }
+      renderWriteoffsForm();
+    } catch (err) {
+      showError(err);
+    }
+  }
+
+  function renderWriteoffsForm(){
     panel.innerHTML =
       '<section class="panel-stack">' +
         '<div class="card-surface">' +
           '<h2 style="margin-bottom:16px">Новое списание</h2>' +
           '<div class="wo-form">' +
-            '<label class="field">Цветок<select id="wo-flower">' +
-              state.stock.map(function(s){ return '<option value="' + esc(s.name) + '"' + (s.name === state.wo.flower ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join('') +
+            '<label class="field">Цветок<select id="wo-flower"' + (state.inventory.length ? '' : ' disabled') + '>' +
+              (state.inventory.length
+                ? state.inventory.map(function(s){ return '<option value="' + esc(s.flower_name) + '"' + (s.flower_name === state.wo.flower ? ' selected' : '') + '>' + esc(s.flower_name) + '</option>'; }).join('')
+                : '<option value="">нет позиций на складе</option>') +
             '</select></label>' +
             '<label class="field qty">Количество<input type="number" min="1" id="wo-qty" value="' + state.wo.qty + '"></label>' +
             '<label class="field">Причина<select id="wo-reason">' +
               REASONS.map(function(r){ return '<option value="' + r + '"' + (r === state.wo.reason ? ' selected' : '') + '>' + r + '</option>'; }).join('') +
             '</select></label>' +
-            '<button type="button" id="addWriteoffBtn" class="btn-primary">Списать</button>' +
+            '<button type="button" id="addWriteoffBtn" class="btn-primary"' + (state.inventory.length ? '' : ' disabled') + '>Списать</button>' +
           '</div>' +
         '</div>' +
         '<div class="card-surface">' +
@@ -625,53 +734,103 @@ tr.low-row{background:#FDF3E3}
   function renderWriteoffRows(){
     var rows = document.getElementById('writeoffRows');
     if (!rows) return;
+    if (!state.writeoffs.length) { rows.innerHTML = '<tr><td colspan="4" class="hint">Списаний пока нет</td></tr>'; return; }
     rows.innerHTML = state.writeoffs.map(function(w){
       return (
-        '<tr><td>' + esc(w.flower) + '</td><td class="num wo-qty">' + w.qty + '</td>' +
-        '<td><span class="reason-tag">' + esc(w.reason) + '</span></td><td class="phone-col">' + esc(w.date) + '</td></tr>'
+        '<tr><td>' + esc(w.flower_name) + '</td><td class="num wo-qty">' + w.quantity + '</td>' +
+        '<td><span class="reason-tag">' + esc(w.reason) + '</span></td><td class="phone-col">' + esc(fmtDate(new Date(w.created_at))) + '</td></tr>'
       );
     }).join('');
   }
 
-  function onAddWriteoff(){
-    var w = state.wo;
-    var qty = Math.max(1, parseInt(w.qty, 10) || 1);
-    state.writeoffs.unshift({ flower: w.flower, qty: qty, reason: w.reason, date: fmtDate(new Date()) });
-    var item = state.stock.find(function(s){ return s.name === w.flower; });
-    if (item) item.qty = Math.max(0, item.qty - qty);
-    state.wo = { flower: w.flower, qty: 1, reason: w.reason };
-    renderWriteoffsTab();
+  async function onAddWriteoff(){
+    var flowerName = state.wo.flower;
+    if (!flowerName) return;
+    var qty = Math.max(1, parseInt(document.getElementById('wo-qty').value, 10) || 1);
+    var reason = document.getElementById('wo-reason').value;
+    var btn = document.getElementById('addWriteoffBtn');
+    btn.setAttribute('disabled', 'disabled');
+    try {
+      var insertRes = await sb.from('write_offs').insert({ flower_name: flowerName, quantity: qty, reason: reason });
+      if (insertRes.error) throw insertRes.error;
+      var item = state.inventory.find(function(s){ return s.flower_name === flowerName; });
+      if (item) {
+        var newQty = Math.max(0, item.quantity - qty);
+        var updateRes = await sb.from('inventory').update({ quantity: newQty }).eq('id', item.id);
+        if (updateRes.error) throw updateRes.error;
+      }
+      state.wo = { flower: flowerName, qty: 1, reason: reason };
+      loadWriteoffsTabData();
+    } catch (err) {
+      btn.removeAttribute('disabled');
+      alert('Не удалось сохранить списание: ' + (err.message || err));
+    }
   }
 
   /* ---------------- Summary tab ---------------- */
-  function renderSummaryTab(){
-    var revenue = state.orders.reduce(function(a, o){ return a + (o.budget || 0); }, 0);
-    var todayCount = state.orders.filter(function(o){ return o.today; }).length;
-    var writtenOff = state.writeoffs.reduce(function(a, w){ return a + w.qty; }, 0);
-    var low = state.stock.filter(function(s){ return s.qty < 10; }).length;
-    var metrics = [
-      { label:'Заказов сегодня', value: String(todayCount), note:'принято за текущий день' },
-      { label:'Выручка за неделю', value: money(revenue), note:'сумма бюджетов всех заказов' },
-      { label:'Списано за месяц', value: writtenOff + ' шт.', note:'по всем причинам' },
-      { label:'Позиций с низким остатком', value: String(low), note:'остаток меньше 10 шт.' }
-    ];
-    panel.innerHTML =
-      '<section class="stat-grid">' +
-        metrics.map(function(m){
-          return (
-            '<div class="stat-card">' +
-              '<p class="stat-label">' + esc(m.label) + '</p>' +
-              '<p class="stat-value">' + esc(m.value) + '</p>' +
-              '<p class="stat-note">' + esc(m.note) + '</p>' +
-            '</div>'
-          );
-        }).join('') +
-      '</section>';
+  async function renderSummaryTab(){
+    panel.innerHTML = '<section class="stat-grid"><p class="hint">Считаем метрики…</p></section>';
+    try {
+      var now = new Date();
+      var startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      var startOfTodayISO = startOfToday.toISOString();
+      var endOfTodayISO = new Date(startOfToday.getTime() + 24 * 3600 * 1000).toISOString();
+      var weekAgoISO = new Date(now.getTime() - 7 * 24 * 3600 * 1000).toISOString();
+      var monthAgoISO = new Date(now.getTime() - 30 * 24 * 3600 * 1000).toISOString();
+
+      var results = await Promise.all([
+        sb.from('orders').select('id', { count: 'exact', head: true }).gte('created_at', startOfTodayISO).lt('created_at', endOfTodayISO),
+        sb.from('orders').select('budget').gte('created_at', weekAgoISO),
+        sb.from('write_offs').select('quantity').gte('created_at', monthAgoISO),
+        sb.from('inventory').select('id', { count: 'exact', head: true }).lt('quantity', 10)
+      ]);
+      results.forEach(function(r){ if (r.error) throw r.error; });
+
+      var todayCount = results[0].count || 0;
+      var revenue = (results[1].data || []).reduce(function(a, o){ return a + (o.budget || 0); }, 0);
+      var writtenOff = (results[2].data || []).reduce(function(a, w){ return a + (w.quantity || 0); }, 0);
+      var low = results[3].count || 0;
+
+      var metrics = [
+        { label:'Заказов сегодня', value: String(todayCount), note:'принято за текущий день' },
+        { label:'Выручка за неделю', value: money(revenue), note:'сумма бюджетов заказов за 7 дней' },
+        { label:'Списано за месяц', value: writtenOff + ' шт.', note:'по всем причинам за 30 дней' },
+        { label:'Позиций с низким остатком', value: String(low), note:'остаток меньше 10 шт.' }
+      ];
+      panel.innerHTML =
+        '<section class="stat-grid">' +
+          metrics.map(function(m){
+            return (
+              '<div class="stat-card">' +
+                '<p class="stat-label">' + esc(m.label) + '</p>' +
+                '<p class="stat-value">' + esc(m.value) + '</p>' +
+                '<p class="stat-note">' + esc(m.note) + '</p>' +
+              '</div>'
+            );
+          }).join('') +
+        '</section>';
+    } catch (err) {
+      showError(err);
+    }
   }
 
   /* ---------------- boot ---------------- */
-  renderTabs();
-  renderPanel();
+  async function boot(){
+    try {
+      var cfgRes = await fetch('/api/config');
+      var cfg = await cfgRes.json();
+      if (!cfg.url || !cfg.anonKey) {
+        throw new Error('Supabase не настроен: заполните SUPABASE_URL и SUPABASE_ANON_KEY (.env.local локально, Environment Variables на Vercel в проде)');
+      }
+      sb = window.supabase.createClient(cfg.url, cfg.anonKey);
+    } catch (err) {
+      panel.innerHTML = '<section class="card-surface"><h2>Ошибка подключения к Supabase</h2><p class="hint">' + esc(err.message || String(err)) + '</p></section>';
+      return;
+    }
+    renderTabs();
+    renderPanel();
+  }
+  boot();
 })();
 </script>
 </body>
