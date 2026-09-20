@@ -201,8 +201,6 @@ tr.low-row{background:#FDF3E3}
     done:    { title: 'Доставлен',       color: '#2f6d5d' }
   };
   var STATUS_ORDER = ['new','build','courier','done'];
-  var FLOWERS = ['пион','роз','тюльпан','хризантем','орхиде','лили'];
-  var FLOWER_NAME = { 'пион':'Пионы','роз':'Розы','тюльпан':'Тюльпаны','хризантем':'Хризантемы','орхиде':'Орхидеи','лили':'Лилии' };
   var TABS = [['orders','Заказы'],['clients','Клиенты'],['stock','Склад'],['writeoffs','Списания'],['summary','Сводка']];
 
   function fmtDate(d){ return d.getDate() + ' ' + MONTHS[d.getMonth()]; }
@@ -213,42 +211,28 @@ tr.low-row{background:#FDF3E3}
     });
   }
 
-  function parseOrder(text){
-    var t = text.toLowerCase();
-    var out = { bouquet:'', budget:'', date:'', address:'', client:'', phone:'', channel:'WhatsApp' };
-
-    var m = t.match(/(?:бюджет|до|около|за)?\s*([0-9][0-9\s]{2,8})\s*(?:тг|тенге|₸|k|тыс)/);
-    if (!m) m = t.match(/бюджет[^0-9]{0,12}([0-9][0-9\s]{2,8})/);
-    if (!m) m = t.match(/(?<![0-9:.])([0-9]{4,6})(?![0-9:.])/);
-    if (m) {
-      var n = parseInt(m[1].replace(/\s/g, ''), 10);
-      if (!isNaN(n) && n >= 1000) out.budget = String(n);
+  /* Настоящее распознавание переписки идёт через Claude API (/api/parse-order),
+     а не локальной эвристикой — см. onRecognize(). */
+  async function parseOrder(text){
+    var res = await fetch('/api/parse-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text })
+    });
+    if (!res.ok) {
+      var errBody = await res.json().catch(function(){ return {}; });
+      throw new Error(errBody.error || ('Сервер вернул ' + res.status));
     }
-
-    var found = [];
-    FLOWERS.forEach(function(k){ if (t.indexOf(k) !== -1) found.push(FLOWER_NAME[k]); });
-    var cnt = t.match(/([0-9]{1,3})\s*(?:шт|штук|цветк|бутон)/);
-    if (found.length) out.bouquet = found.join(' + ') + (cnt ? ', ' + cnt[1] + ' шт.' : '');
-
-    var parts = [];
-    if (/послезавтра/.test(t)) parts.push('послезавтра');
-    else if (/завтра/.test(t)) parts.push('завтра');
-    else if (/сегодня/.test(t)) parts.push('сегодня');
-    var tm = t.match(/(?:к\s*)?([0-2]?[0-9])[:.]([0-5][0-9])/) || t.match(/к\s*([0-2]?[0-9])\s*(?:час|ч\b)/);
-    if (tm) parts.push(tm[2] !== undefined ? (tm[1].length === 1 ? '0' + tm[1] : tm[1]) + ':' + tm[2] : tm[1] + ':00');
-    if (parts.length) out.date = parts.join(', ');
-
-    var am = text.match(/((?:ул\.?|улица|мкр\.?|микрорайон|пр-т|проспект|пр\.)\s*[^,.;!?\n]*)/i);
-    if (am) out.address = am[1].trim().replace(/\s+/g, ' ');
-
-    var nm = text.match(/(?:зовут|это|я\s+—?|меня)\s+([А-ЯЁ][а-яё]+)/) || text.match(/(?:зовут|имя)[:\s]+([а-яё]+)/i);
-    if (nm) out.client = nm[1].charAt(0).toUpperCase() + nm[1].slice(1);
-
-    var pm = text.match(/(\+?7|8)[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}/);
-    if (pm) out.phone = pm[0].trim();
-
-    if (/инстаграм|instagram|директ|direct/i.test(text)) out.channel = 'Instagram';
-    return out;
+    var r = await res.json();
+    return {
+      bouquet: r.flowers || '',
+      budget: r.budget != null ? String(r.budget) : '',
+      date: r.deliveryDate || '',
+      address: r.address || '',
+      client: r.clientName || '',
+      phone: r.clientPhone || '',
+      channel: r.channel === 'instagram' ? 'Instagram' : 'WhatsApp'
+    };
   }
 
   /* ---------------- Supabase ---------------- */
@@ -434,18 +418,21 @@ tr.low-row{background:#FDF3E3}
     );
   }
 
-  function onRecognize(){
+  async function onRecognize(){
     if (!state.chat.trim() || state.loading) return;
     state.loading = true;
     state.showForm = false;
     renderOrdersTab();
-    var delay = 800 + Math.random() * 400;
-    setTimeout(function(){
-      state.loading = false;
+    try {
+      var form = await parseOrder(state.chat);
+      state.form = form;
       state.showForm = true;
-      state.form = parseOrder(state.chat);
+    } catch (err) {
+      alert('Не удалось распознать заказ: ' + (err.message || err));
+    } finally {
+      state.loading = false;
       renderOrdersTab();
-    }, delay);
+    }
   }
 
   async function onCreateOrder(){

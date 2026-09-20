@@ -1,0 +1,10 @@
+{
+  "name": "florify",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.127.0"
+  }
+}
