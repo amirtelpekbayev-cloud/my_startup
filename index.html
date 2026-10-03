@@ -143,7 +143,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:14.5px}
 thead th{text-align:left;padding:10px 12px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--rose);border-bottom:1px solid var(--line-soft);white-space:nowrap}
-th.num,td.num{text-align:right}
+th.num,td.num{text-align:right;white-space:nowrap}
 tbody td{padding:14px 12px;border-bottom:1px solid #F4EADB}
 .orders-count{font-family:'Manrope',sans-serif;font-weight:600;color:var(--burgundy)}
 .phone-col{color:var(--ink-soft)}
@@ -172,14 +172,87 @@ tr.low-row{background:#FDF3E3}
 
 /* ---------- summary ---------- */
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
+#analytics .stat-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 .stat-card{background:var(--card);border-radius:24px;padding:26px;box-shadow:0 6px 24px rgba(109,46,70,.09)}
 .stat-label{margin:0;font-size:13px;color:var(--rose)}
-.stat-value{margin:10px 0 0;font-family:'Manrope',sans-serif;font-weight:800;font-size:40px;line-height:1;letter-spacing:-0.03em;color:var(--burgundy);font-variant-numeric:tabular-nums}
+.stat-value{margin:10px 0 0;font-family:'Manrope',sans-serif;font-weight:800;font-size:34px;line-height:1.1;letter-spacing:-0.03em;color:var(--burgundy)}
 .stat-note{margin:8px 0 0;font-size:12.5px;color:#8A7A72}
+
+/* ---------- board toolbar, card actions ---------- */
+.board-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.pill-group{display:inline-flex;gap:4px;background:var(--card);border-radius:999px;padding:4px;box-shadow:0 2px 10px rgba(109,46,70,.06)}
+.pill{border:none;background:transparent;color:var(--rose);font-weight:600;font-size:13.5px;padding:8px 16px;border-radius:999px;cursor:pointer;font-family:'Manrope',sans-serif}
+.pill.active{background:var(--burgundy);color:#FFF7EC}
+.check{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft);cursor:pointer}
+.btn-link{border:none;background:none;color:var(--burgundy);text-decoration:underline;cursor:pointer;padding:4px;font-size:13px}
+.col-empty{margin:4px 2px;font-size:12.5px;color:var(--rose-soft)}
+.kcard.cancelled{opacity:.6}
+.kcard.cancelled .kcard-bouquet{text-decoration:line-through}
+.kcard-phone{margin-left:auto;font-size:12px;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
+.kcard-actions{display:flex;gap:8px;margin-top:12px}
+.btn-step{flex:1;border:none;border-radius:999px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Manrope',sans-serif;background:#F6EDE0;color:var(--burgundy);transition:background .15s}
+.btn-step:hover{background:#EEDFCB}
+.btn-icon{width:36px;height:36px;flex:none;border:1px solid var(--line);border-radius:50%;background:var(--card-alt);color:var(--burgundy);cursor:pointer;font-size:15px}
+.late-badge{display:inline-block;background:#F9E1DE;color:#8E2A22;font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;margin-left:4px}
+.field.wide{grid-column:1/-1}
+.field-note{grid-column:1/-1;margin:-6px 0 0;font-size:12.5px;color:var(--ink-soft)}
+.btn-danger{background:transparent;color:#a8342f;border:1px solid #E7C3BE;border-radius:999px;padding:12px 20px;font-size:14.5px;cursor:pointer}
+.btn-danger.armed{background:#a8342f;color:#fff;border-color:#a8342f}
+.price-input{width:96px;text-align:right;border:1px solid var(--line);background:var(--card-alt);border-radius:10px;padding:7px 10px;color:var(--ink)}
+
+/* ---------- edit dialog ---------- */
+.dialog{border:none;border-radius:24px;padding:0;width:min(720px,calc(100vw - 32px));background:var(--card);color:var(--ink);box-shadow:0 20px 60px rgba(59,43,47,.25)}
+.dialog::backdrop{background:rgba(59,43,47,.35)}
+.dialog-body{padding:22px 24px}
+.status-field{margin-top:14px;max-width:260px}
+.dialog-actions{flex-wrap:wrap}
+.dialog-actions .spacer{flex:1}
+
+/* ---------- analytics ---------- */
+#analytics.refreshing{opacity:.55;transition:opacity .15s}
+.chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.chart-card{min-width:0}
+.chart-card.wide{grid-column:1/-1}
+.chart-head{margin-bottom:16px}
+.chart-head .hint{margin:4px 0 0;font-size:12.5px;color:var(--rose)}
+.chart-empty{margin:8px 0;font-size:13.5px;color:var(--rose-soft)}
+.chart-box{width:100%}
+.chart-svg{width:100%;height:auto;display:block}
+.chart-svg .grid{stroke:var(--line-soft);stroke-width:1}
+.chart-svg .tick{font-size:11px;fill:#8A7A72;font-variant-numeric:tabular-nums}
+.chart-svg .peak{font-size:11.5px;font-weight:600;fill:var(--ink)}
+.chart-svg .bar{fill:var(--burgundy)}
+.chart-svg .hit{fill:transparent}
+.chart-svg .hit:hover{fill:rgba(109,46,70,.06)}
+.chart-table{margin-top:10px;font-size:13px}
+.chart-table summary{cursor:pointer;color:var(--rose)}
+.hbars{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.hbar-row{display:grid;grid-template-columns:minmax(90px,34%) 1fr auto;align-items:center;gap:10px;font-size:13px;border-radius:8px;padding:2px 0}
+.hbar-row:focus-visible{outline:2px solid var(--amber)}
+.hbar-label{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar-track{height:12px;display:flex;align-items:center}
+.hbar{display:block;height:12px;background:var(--burgundy);border-radius:0 4px 4px 0}
+.hbar-value{color:var(--ink-soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+table.compare{margin-bottom:16px}
+.heat-wrap{overflow-x:auto}
+.heat{display:grid;grid-template-columns:28px repeat(24,minmax(14px,1fr));gap:2px;min-width:420px}
+.heat-hour{font-size:10.5px;color:#8A7A72;text-align:left}
+.heat-day{font-size:11.5px;color:var(--ink-soft);align-self:center}
+.heat-cell{display:block;height:22px;border-radius:3px;background:color-mix(in srgb,var(--burgundy) var(--lvl),var(--line-soft))}
+.heat-legend{display:flex;align-items:center;gap:4px;margin-top:10px;font-size:11.5px;color:#8A7A72}
+.heat-legend .heat-cell{width:14px;height:14px}
+.chart-tip{position:fixed;z-index:20;pointer-events:none;background:var(--ink);color:#FFF7EC;font-size:12.5px;padding:6px 10px;border-radius:8px;max-width:280px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
 
 @media (max-width:640px){
   .shell{padding:20px 16px 56px}
   .brand h1{font-size:34px}
+  .dialog-body{padding:18px 16px}
+  .stat-value{font-size:22px;white-space:nowrap}
+  .stat-card{padding:18px}
+}
+@media (max-width:900px){
+  .chart-grid{grid-template-columns:minmax(0,1fr)}
+  #analytics .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 </style>
 </head>
@@ -200,27 +273,80 @@ tr.low-row{background:#FDF3E3}
   <nav class="tabs" id="tabs"></nav>
   <div id="panel"></div>
 </div>
+<dialog id="orderDialog" class="dialog" aria-label="Заказ"></dialog>
+<div id="chartTip" class="chart-tip" role="tooltip" hidden></div>
 
 <script>
 (function(){
   "use strict";
 
   var MONTHS = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+  var WEEKDAYS = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
   var STATUS = {
-    new:     { title: 'Новый',           color: '#c9a648' },
-    build:   { title: 'В сборке',        color: '#2f5fa8' },
-    courier: { title: 'Передан курьеру', color: '#7a5ea8' },
-    done:    { title: 'Доставлен',       color: '#2f6d5d' }
+    new:       { title: 'Новый',           color: '#c9a648', next: 'build',   nextLabel: '→ В сборку' },
+    build:     { title: 'В сборке',        color: '#2f5fa8', next: 'courier', nextLabel: '→ Курьеру' },
+    courier:   { title: 'Передан курьеру', color: '#7a5ea8', next: 'done',    nextLabel: '✓ Доставлен' },
+    done:      { title: 'Доставлен',       color: '#2f6d5d' },
+    cancelled: { title: 'Отменён',         color: '#9a8a80' }
   };
   var STATUS_ORDER = ['new','build','courier','done'];
-  var TABS = [['orders','Заказы'],['clients','Клиенты'],['stock','Склад'],['writeoffs','Списания'],['summary','Сводка']];
+  var DONE_LIMIT = 20;
+  var TABS = [['orders','Заказы'],['clients','Клиенты'],['stock','Склад'],['writeoffs','Списания'],['summary','Аналитика']];
 
   function fmtDate(d){ return d.getDate() + ' ' + MONTHS[d.getMonth()]; }
-  function money(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₸'; }
+  function money(n){ return String(Math.round(n || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₸'; }
+  function num(n){ return String(Math.round(n || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
   function esc(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
       return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
     });
+  }
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+  /* дата в местном времени магазина как 'YYYY-MM-DD' */
+  function isoDay(d){ return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function addDays(d, n){ var x = new Date(d); x.setDate(x.getDate() + n); return x; }
+  function parseDay(s){ var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function hhmm(t){ return t ? String(t).slice(0, 5) : ''; }
+  function fmtDuration(min){
+    if (min == null) return '—';
+    min = Math.round(min);
+    if (min < 60) return min + ' мин';
+    var h = Math.floor(min / 60), m = min % 60;
+    if (h < 24) return h + ' ч' + (m ? ' ' + m + ' мин' : '');
+    var d = Math.floor(h / 24);
+    return d + ' д ' + (h % 24) + ' ч';
+  }
+  function pct(a, b){ return b ? Math.round(a / b * 100) + '%' : '—'; }
+
+  /* состав по позициям <-> строка «Роза — 25, Эвкалипт — 5» для ручной правки */
+  function itemsToText(items){
+    return (items || []).map(function(it){ return it.flower + (it.qty ? ' — ' + it.qty : ''); }).join(', ');
+  }
+  function textToItems(text){
+    return String(text || '').split(/[,;\n]/).map(function(part){
+      part = part.trim();
+      if (!part) return null;
+      var m = part.match(/^(.+?)(?:\s*[—–\-×x:]\s*|\s+)(\d+)\s*(?:шт\.?)?$/i);
+      return m ? { flower: m[1].trim(), qty: parseInt(m[2], 10) } : { flower: part, qty: null };
+    }).filter(Boolean);
+  }
+
+  function deliveryPlanned(o){
+    if (!o.delivery_on) return null;
+    return new Date(o.delivery_on + 'T' + (o.delivery_time ? hhmm(o.delivery_time) : '23:59'));
+  }
+  function isLate(o){
+    if (o.status === 'done' || o.status === 'cancelled') return false;
+    var p = deliveryPlanned(o);
+    return !!p && p < new Date();
+  }
+  function fmtDelivery(o){
+    if (!o.delivery_on) return o.delivery_date || '';
+    var today = isoDay(new Date());
+    var label = o.delivery_on === today ? 'Сегодня'
+      : o.delivery_on === isoDay(addDays(new Date(), 1)) ? 'Завтра'
+      : fmtDate(parseDay(o.delivery_on));
+    return label + (o.delivery_time ? ', ' + hhmm(o.delivery_time) : '');
   }
 
   /* Настоящее распознавание переписки идёт через Claude API (/api/parse-order),
@@ -229,10 +355,15 @@ tr.low-row{background:#FDF3E3}
     var sessionRes = await sb.auth.getSession();
     var session = sessionRes.data && sessionRes.data.session;
     if (!session) throw new Error('Сессия истекла — войдите заново');
+    var now = new Date();
     var res = await fetch('/api/parse-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
-      body: JSON.stringify({ text: text })
+      body: JSON.stringify({
+        text: text,
+        now: isoDay(now) + ' (' + WEEKDAYS[now.getDay()] + '), ' + pad(now.getHours()) + ':' + pad(now.getMinutes()),
+        flowerNames: state.flowerNames
+      })
     });
     if (!res.ok) {
       var errBody = await res.json().catch(function(){ return {}; });
@@ -241,8 +372,11 @@ tr.low-row{background:#FDF3E3}
     var r = await res.json();
     return {
       bouquet: r.flowers || '',
+      items: itemsToText(r.items),
       budget: r.budget != null ? String(r.budget) : '',
       date: r.deliveryDate || '',
+      time: r.deliveryTime || '',
+      dateText: r.deliveryText || '',
       address: r.address || '',
       client: r.clientName || '',
       phone: r.clientPhone || '',
@@ -253,25 +387,36 @@ tr.low-row{background:#FDF3E3}
   /* ---------------- Supabase ---------------- */
   var sb = null;
 
+  function emptyForm(){
+    return { bouquet:'', items:'', budget:'', date:'', time:'', dateText:'', address:'', client:'', phone:'', channel:'WhatsApp' };
+  }
+
   /* ---------------- local UI state (данные экранов живут в Supabase, не здесь) ---------------- */
   var state = {
     tab: 'orders',
     chat: '',
     loading: false,
     showForm: false,
-    form: { bouquet:'', budget:'', date:'', address:'', client:'', phone:'', channel:'WhatsApp' },
+    formSource: 'ai',
+    form: emptyForm(),
     dragId: null,
     orders: [],
+    boardFilter: 'all',
+    showCancelled: false,
+    flowerNames: [],
     clients: [],
     showClientForm: false,
     newClient: { name:'', phone:'' },
     inventory: [],
+    showStockForm: false,
     wo: { flower:'', qty:1, reason:'брак' },
-    writeoffs: []
+    writeoffs: [],
+    period: 30
   };
 
   var panel = document.getElementById('panel');
   var tabsEl = document.getElementById('tabs');
+  var dialog = document.getElementById('orderDialog');
 
   function showError(err, area){
     var target = (area && document.getElementById(area)) || panel;
@@ -306,8 +451,72 @@ tr.low-row{background:#FDF3E3}
     else renderSummaryTab();
   }
 
+  /* ---------------- order form (общая для нового заказа и редактирования) ---------------- */
+  function orderFields(f, prefix){
+    function field(label, type, key, extra){
+      return '<label class="field' + (extra || '') + '">' + esc(label) +
+        '<input type="' + type + '" id="' + prefix + key + '" value="' + esc(f[key]) + '" placeholder="не указано">' +
+      '</label>';
+    }
+    return (
+      '<div class="form-grid">' +
+        field('Состав букета', 'text', 'bouquet', ' wide') +
+        field('Позиции (цветок — шт., через запятую)', 'text', 'items', ' wide') +
+        field('Бюджет, ₸', 'number', 'budget') +
+        field('Дата доставки', 'date', 'date') +
+        field('Время доставки', 'time', 'time') +
+        (f.dateText ? '<p class="field-note">Клиент написал: «' + esc(f.dateText) + '»</p>' : '') +
+        field('Адрес', 'text', 'address', ' wide') +
+        field('Клиент', 'text', 'client') +
+        field('Телефон клиента', 'tel', 'phone') +
+        '<label class="field">Канал' +
+          '<select id="' + prefix + 'channel">' +
+            '<option value="WhatsApp"' + (f.channel === 'WhatsApp' ? ' selected' : '') + '>WhatsApp</option>' +
+            '<option value="Instagram"' + (f.channel === 'Instagram' ? ' selected' : '') + '>Instagram</option>' +
+          '</select>' +
+        '</label>' +
+      '</div>'
+    );
+  }
+  var FORM_KEYS = ['bouquet','items','budget','date','time','address','client','phone','channel'];
+  function bindOrderFields(f, prefix){
+    FORM_KEYS.forEach(function(key){
+      var input = document.getElementById(prefix + key);
+      input.addEventListener(input.tagName === 'SELECT' ? 'change' : 'input', function(){ f[key] = input.value; });
+    });
+  }
+  function formToPayload(f){
+    return {
+      flowers: f.bouquet || null,
+      items: textToItems(f.items),
+      budget: parseInt(f.budget, 10) || 0,
+      delivery_on: f.date || null,
+      delivery_time: f.time || null,
+      delivery_date: f.dateText || null,
+      address: f.address || null,
+      client_name: f.client || null,
+      client_phone: f.phone || null,
+      channel: f.channel
+    };
+  }
+  function orderToForm(o){
+    return {
+      bouquet: o.flowers || '',
+      items: itemsToText(o.items),
+      budget: o.budget ? String(o.budget) : '',
+      date: o.delivery_on || '',
+      time: hhmm(o.delivery_time),
+      dateText: o.delivery_date || '',
+      address: o.address || '',
+      client: o.client_name || '',
+      phone: o.client_phone || '',
+      channel: o.channel === 'Instagram' ? 'Instagram' : 'WhatsApp'
+    };
+  }
+
   /* ---------------- Orders tab ---------------- */
   function renderOrdersTab(){
+    var filters = [['all','Все'],['today','Сегодня'],['tomorrow','Завтра']];
     panel.innerHTML =
       '<section class="panel-stack">' +
         '<div class="card-surface">' +
@@ -320,8 +529,17 @@ tr.low-row{background:#FDF3E3}
             '<button type="button" id="recognizeBtn" class="btn-recognize">' + (state.loading ? 'Распознаём…' : 'Распознать ИИ') + '</button>' +
             (state.loading ? '<span class="spinner"></span>' : '') +
             '<span class="recognize-hint">' + (state.loading ? 'Ассистент читает переписку' : 'Поля можно поправить перед созданием') + '</span>' +
+            '<button type="button" id="manualBtn" class="btn-link">или заполнить вручную</button>' +
           '</div>' +
           '<div id="recognizedArea"></div>' +
+        '</div>' +
+        '<div class="board-toolbar">' +
+          '<div class="pill-group" role="group" aria-label="Фильтр заказов">' +
+            filters.map(function(f){
+              return '<button type="button" class="pill' + (state.boardFilter === f[0] ? ' active' : '') + '" data-board-filter="' + f[0] + '">' + f[1] + '</button>';
+            }).join('') +
+          '</div>' +
+          '<label class="check"><input type="checkbox" id="showCancelled"' + (state.showCancelled ? ' checked' : '') + '> Показать отменённые</label>' +
         '</div>' +
         '<div class="board" id="board"><p class="hint">Загрузка заказов…</p></div>' +
       '</section>';
@@ -333,10 +551,31 @@ tr.low-row{background:#FDF3E3}
     var recognizeBtn = document.getElementById('recognizeBtn');
     if (state.loading) recognizeBtn.setAttribute('disabled', 'disabled');
     recognizeBtn.addEventListener('click', onRecognize);
+    document.getElementById('manualBtn').addEventListener('click', function(){
+      state.form = emptyForm();
+      state.formSource = 'manual';
+      state.showForm = true;
+      renderRecognized();
+    });
+    document.getElementById('showCancelled').addEventListener('change', function(e){
+      state.showCancelled = e.target.checked;
+      renderBoard();
+    });
 
     renderRecognized();
     loadOrders();
+    loadFlowerNames();
   }
+
+  panel.addEventListener('click', function(e){
+    var f = e.target.closest('[data-board-filter]');
+    if (!f) return;
+    state.boardFilter = f.getAttribute('data-board-filter');
+    panel.querySelectorAll('[data-board-filter]').forEach(function(b){
+      b.classList.toggle('active', b === f);
+    });
+    renderBoard();
+  });
 
   async function loadOrders(){
     var board = document.getElementById('board');
@@ -350,62 +589,64 @@ tr.low-row{background:#FDF3E3}
     }
   }
 
+  async function loadFlowerNames(){
+    var res = await sb.from('inventory').select('flower_name').order('flower_name');
+    if (!res.error) state.flowerNames = (res.data || []).map(function(r){ return r.flower_name; }).filter(Boolean);
+  }
+
   function renderRecognized(){
     var area = document.getElementById('recognizedArea');
     if (!area) return;
     if (!state.showForm) { area.innerHTML = ''; return; }
-    var f = state.form;
     area.innerHTML =
       '<div class="recognized">' +
         '<div class="recognized-head">' +
-          '<span class="recognized-flag">Распознано</span>' +
-          '<span class="hint">Проверьте поля и поправьте вручную</span>' +
+          (state.formSource === 'ai'
+            ? '<span class="recognized-flag">Распознано</span><span class="hint">Проверьте поля и поправьте вручную</span>'
+            : '<span class="hint">Новый заказ вручную</span>') +
         '</div>' +
-        '<div class="form-grid">' +
-          field('Состав букета', 'text', 'f-bouquet', f.bouquet) +
-          field('Бюджет, ₸', 'text', 'f-budget', f.budget) +
-          field('Дата доставки', 'text', 'f-date', f.date) +
-          field('Адрес', 'text', 'f-address', f.address) +
-          field('Клиент', 'text', 'f-client', f.client) +
-          field('Телефон клиента', 'text', 'f-phone', f.phone) +
-          '<label class="field">Канал' +
-            '<select id="f-channel">' +
-              '<option value="WhatsApp"' + (f.channel === 'WhatsApp' ? ' selected' : '') + '>WhatsApp</option>' +
-              '<option value="Instagram"' + (f.channel === 'Instagram' ? ' selected' : '') + '>Instagram</option>' +
-            '</select>' +
-          '</label>' +
-        '</div>' +
+        orderFields(state.form, 'f-') +
         '<div class="form-actions">' +
           '<button type="button" id="createOrderBtn" class="btn-primary">Создать заказ</button>' +
           '<button type="button" id="cancelFormBtn" class="btn-cancel">Отмена</button>' +
         '</div>' +
       '</div>';
-
-    function field(label, type, id, value){
-      return '<label class="field">' + esc(label) +
-        '<input type="' + type + '" id="' + id + '" value="' + esc(value) + '" placeholder="не указано">' +
-      '</label>';
-    }
-
-    ['bouquet','budget','date','address','client','phone'].forEach(function(key){
-      var input = document.getElementById('f-' + key);
-      input.addEventListener('input', function(){ state.form[key] = input.value; });
-    });
-    document.getElementById('f-channel').addEventListener('change', function(e){ state.form.channel = e.target.value; });
+    bindOrderFields(state.form, 'f-');
     document.getElementById('createOrderBtn').addEventListener('click', onCreateOrder);
     document.getElementById('cancelFormBtn').addEventListener('click', function(){ state.showForm = false; renderRecognized(); });
+  }
+
+  function sortByDelivery(a, b){
+    var ka = (a.delivery_on || '9999') + (hhmm(a.delivery_time) || '99');
+    var kb = (b.delivery_on || '9999') + (hhmm(b.delivery_time) || '99');
+    return ka < kb ? -1 : ka > kb ? 1 : 0;
   }
 
   function renderBoard(){
     var board = document.getElementById('board');
     if (!board) return;
-    board.innerHTML = STATUS_ORDER.map(function(key){
+    var orders = state.orders;
+    var day = state.boardFilter === 'today' ? isoDay(new Date())
+      : state.boardFilter === 'tomorrow' ? isoDay(addDays(new Date(), 1)) : null;
+    if (day) orders = orders.filter(function(o){ return o.delivery_on === day; });
+    var cols = STATUS_ORDER.concat(state.showCancelled ? ['cancelled'] : []);
+    board.innerHTML = cols.map(function(key){
       var st = STATUS[key];
-      var cards = state.orders.filter(function(o){ return o.status === key; });
+      var cards = orders.filter(function(o){ return o.status === key; });
+      var hidden = 0;
+      if (key === 'done' || key === 'cancelled') {
+        // завершённые — свежие сверху, остальные — по времени доставки
+        if (!day && cards.length > DONE_LIMIT) { hidden = cards.length - DONE_LIMIT; cards = cards.slice(0, DONE_LIMIT); }
+      } else {
+        cards = cards.slice().sort(sortByDelivery);
+      }
       return (
         '<div class="column" data-col="' + key + '" style="--col-accent:' + st.color + '">' +
-          '<div class="column-head"><span class="col-dot"></span><h3>' + esc(st.title) + '</h3><span class="col-count">' + cards.length + '</span></div>' +
-          '<div class="col-body">' + cards.map(renderCard).join('') + '</div>' +
+          '<div class="column-head"><span class="col-dot"></span><h3>' + esc(st.title) + '</h3><span class="col-count">' + (cards.length + hidden) + '</span></div>' +
+          '<div class="col-body">' +
+            (cards.length ? cards.map(renderCard).join('') : '<p class="col-empty">Пусто</p>') +
+            (hidden ? '<p class="col-empty">и ещё ' + hidden + ' — см. «Сегодня» / «Аналитика»</p>' : '') +
+          '</div>' +
         '</div>'
       );
     }).join('');
@@ -414,20 +655,30 @@ tr.low-row{background:#FDF3E3}
   function renderCard(o){
     var initial = esc((o.client_name || '?').charAt(0));
     var channelClass = o.channel === 'WhatsApp' ? 'wa' : 'ig';
+    var st = STATUS[o.status] || STATUS.new;
+    var delivery = fmtDelivery(o);
+    var late = isLate(o);
     return (
-      '<article class="kcard" draggable="true" data-card-id="' + o.id + '">' +
+      '<article class="kcard' + (o.status === 'cancelled' ? ' cancelled' : '') + '" draggable="true" data-card-id="' + o.id + '">' +
         '<div class="kcard-top">' +
-          '<p class="kcard-bouquet">' + esc(o.flowers || 'не указано') + '</p>' +
+          '<p class="kcard-bouquet">' + esc(o.flowers || itemsToText(o.items) || 'не указано') + '</p>' +
           '<span class="channel-badge ' + channelClass + '">' + esc(o.channel) + '</span>' +
         '</div>' +
         '<p class="kcard-price">' + (o.budget ? money(o.budget) : 'не указано') + '</p>' +
         '<div class="kcard-meta">' +
-          '<span class="' + (o.delivery_date ? 'filled' : 'muted') + '">' + esc(o.delivery_date || 'дата не указана') + '</span>' +
+          '<span class="' + (delivery ? 'filled' : 'muted') + '">' + esc(delivery || 'дата не указана') +
+            (late ? ' <span class="late-badge">⚠ опаздывает</span>' : '') + '</span>' +
           '<span class="' + (o.address ? 'filled' : 'muted') + '">' + esc(o.address || 'адрес не указан') + '</span>' +
         '</div>' +
         '<div class="kcard-client">' +
           '<span class="avatar">' + initial + '</span>' +
           '<span class="' + (o.client_name ? 'client-name' : 'muted') + '">' + esc(o.client_name || 'клиент не указан') + '</span>' +
+          (o.client_phone ? '<a class="kcard-phone" href="tel:' + esc(o.client_phone.replace(/[^\d+]/g, '')) + '">' + esc(o.client_phone) + '</a>' : '') +
+        '</div>' +
+        '<div class="kcard-actions">' +
+          (st.next ? '<button type="button" class="btn-step" data-move="' + o.id + '" data-to="' + st.next + '">' + esc(st.nextLabel) + '</button>' : '') +
+          (o.status === 'cancelled' ? '<button type="button" class="btn-step" data-move="' + o.id + '" data-to="new">Вернуть в работу</button>' : '') +
+          '<button type="button" class="btn-icon" data-edit="' + o.id + '" aria-label="Изменить заказ" title="Изменить">✎</button>' +
         '</div>' +
       '</article>'
     );
@@ -441,6 +692,7 @@ tr.low-row{background:#FDF3E3}
     try {
       var form = await parseOrder(state.chat);
       state.form = form;
+      state.formSource = 'ai';
       state.showForm = true;
     } catch (err) {
       alert('Не удалось распознать заказ: ' + (err.message || err));
@@ -451,17 +703,8 @@ tr.low-row{background:#FDF3E3}
   }
 
   async function onCreateOrder(){
-    var f = state.form;
-    var payload = {
-      flowers: f.bouquet || null,
-      budget: parseInt(f.budget, 10) || 0,
-      delivery_date: f.date || null,
-      address: f.address || null,
-      client_name: f.client || null,
-      client_phone: f.phone || null,
-      channel: f.channel,
-      status: 'new'
-    };
+    var payload = formToPayload(state.form);
+    payload.status = 'new';
     var btn = document.getElementById('createOrderBtn');
     if (btn) btn.setAttribute('disabled', 'disabled');
     try {
@@ -469,7 +712,7 @@ tr.low-row{background:#FDF3E3}
       if (res.error) throw res.error;
       state.showForm = false;
       state.chat = '';
-      state.form = { bouquet:'', budget:'', date:'', address:'', client:'', phone:'', channel:'WhatsApp' };
+      state.form = emptyForm();
       renderOrdersTab();
     } catch (err) {
       if (btn) btn.removeAttribute('disabled');
@@ -477,7 +720,92 @@ tr.low-row{background:#FDF3E3}
     }
   }
 
-  /* drag & drop, delegated on the whole panel since #board is rebuilt often */
+  /* смена статуса: кнопки на карточке, перетаскивание и форма редактирования идут сюда */
+  async function setStatus(orderId, status){
+    var order = state.orders.find(function(o){ return o.id === orderId; });
+    if (!order || order.status === status) return;
+    var prevStatus = order.status;
+    order.status = status;
+    renderBoard();
+    try {
+      var res = await sb.from('orders').update({ status: status }).eq('id', orderId);
+      if (res.error) throw res.error;
+    } catch (err) {
+      order.status = prevStatus;
+      renderBoard();
+      alert('Не удалось обновить статус заказа: ' + (err.message || err));
+    }
+  }
+
+  panel.addEventListener('click', function(e){
+    var move = e.target.closest('[data-move]');
+    if (move) { setStatus(Number(move.getAttribute('data-move')), move.getAttribute('data-to')); return; }
+    var edit = e.target.closest('[data-edit]');
+    if (edit) openOrderDialog(Number(edit.getAttribute('data-edit')));
+  });
+
+  /* ---------------- edit / cancel / delete order ---------------- */
+  function openOrderDialog(orderId){
+    var order = state.orders.find(function(o){ return o.id === orderId; });
+    if (!order) return;
+    var f = orderToForm(order);
+    var statusKeys = STATUS_ORDER.concat(['cancelled']);
+    dialog.innerHTML =
+      '<form method="dialog" class="dialog-body" id="editForm">' +
+        '<div class="section-head"><h2>Заказ №' + order.id + '</h2>' +
+          '<span class="hint">создан ' + esc(fmtDate(new Date(order.created_at))) + '</span></div>' +
+        orderFields(f, 'e-') +
+        '<label class="field status-field">Статус<select id="e-status">' +
+          statusKeys.map(function(k){ return '<option value="' + k + '"' + (order.status === k ? ' selected' : '') + '>' + STATUS[k].title + '</option>'; }).join('') +
+        '</select></label>' +
+        '<div class="form-actions dialog-actions">' +
+          '<button type="button" id="saveOrderBtn" class="btn-primary">Сохранить</button>' +
+          '<button type="button" id="closeDialogBtn" class="btn-cancel">Закрыть</button>' +
+          '<span class="spacer"></span>' +
+          (order.status !== 'cancelled' ? '<button type="button" id="cancelOrderBtn" class="btn-cancel">Отменить заказ</button>' : '') +
+          '<button type="button" id="deleteOrderBtn" class="btn-danger">Удалить</button>' +
+        '</div>' +
+      '</form>';
+    bindOrderFields(f, 'e-');
+    // Enter в поле не должен закрывать диалог без сохранения
+    document.getElementById('editForm').addEventListener('submit', function(e){ e.preventDefault(); });
+    document.getElementById('closeDialogBtn').addEventListener('click', function(){ dialog.close(); });
+    document.getElementById('saveOrderBtn').addEventListener('click', async function(){
+      var payload = formToPayload(f);
+      payload.status = document.getElementById('e-status').value;
+      await saveOrder(order.id, payload);
+    });
+    var cancelBtn = document.getElementById('cancelOrderBtn');
+    if (cancelBtn) cancelBtn.addEventListener('click', function(){ dialog.close(); setStatus(order.id, 'cancelled'); });
+    var delBtn = document.getElementById('deleteOrderBtn');
+    delBtn.addEventListener('click', async function(){
+      // удаление в два нажатия, без системного confirm()
+      if (!delBtn.classList.contains('armed')) {
+        delBtn.classList.add('armed');
+        delBtn.textContent = 'Точно удалить?';
+        return;
+      }
+      delBtn.setAttribute('disabled', 'disabled');
+      var res = await sb.from('orders').delete().eq('id', order.id);
+      if (res.error) { delBtn.removeAttribute('disabled'); alert('Не удалось удалить заказ: ' + res.error.message); return; }
+      state.orders = state.orders.filter(function(o){ return o.id !== order.id; });
+      dialog.close();
+      renderBoard();
+    });
+    dialog.showModal();
+  }
+
+  async function saveOrder(orderId, payload){
+    var btn = document.getElementById('saveOrderBtn');
+    btn.setAttribute('disabled', 'disabled');
+    var res = await sb.from('orders').update(payload).eq('id', orderId).select().single();
+    if (res.error) { btn.removeAttribute('disabled'); alert('Не удалось сохранить заказ: ' + res.error.message); return; }
+    state.orders = state.orders.map(function(o){ return o.id === orderId ? res.data : o; });
+    dialog.close();
+    renderBoard();
+  }
+
+  /* drag & drop (на компьютере), delegated on the whole panel since #board is rebuilt often */
   panel.addEventListener('dragstart', function(e){
     var card = e.target.closest('[data-card-id]');
     if (!card) return;
@@ -500,29 +828,15 @@ tr.low-row{background:#FDF3E3}
     var col = e.target.closest('[data-col]');
     if (col) col.classList.remove('drag-over');
   });
-  panel.addEventListener('drop', async function(e){
+  panel.addEventListener('drop', function(e){
     var col = e.target.closest('[data-col]');
     if (!col) return;
     e.preventDefault();
     col.classList.remove('drag-over');
     if (state.dragId == null) return;
-    var status = col.getAttribute('data-col');
     var orderId = state.dragId;
     state.dragId = null;
-    var order = state.orders.find(function(o){ return o.id === orderId; });
-    if (!order) return;
-    var prevStatus = order.status;
-    if (prevStatus === status) return;
-    order.status = status;
-    renderBoard();
-    try {
-      var res = await sb.from('orders').update({ status: status }).eq('id', orderId);
-      if (res.error) throw res.error;
-    } catch (err) {
-      order.status = prevStatus;
-      renderBoard();
-      alert('Не удалось обновить статус заказа: ' + (err.message || err));
-    }
+    setStatus(orderId, col.getAttribute('data-col'));
   });
 
   /* ---------------- Clients tab ---------------- */
@@ -530,10 +844,11 @@ tr.low-row{background:#FDF3E3}
     panel.innerHTML =
       '<section class="card-surface">' +
         '<div class="panel-head-row"><h2>Клиенты</h2><button type="button" id="toggleClientFormBtn" class="btn-primary">Добавить клиента</button></div>' +
+        '<p class="hint" style="margin:-8px 0 16px">Клиенты добавляются автоматически по телефону из заказа.</p>' +
         '<div id="clientFormArea"></div>' +
         '<div class="table-wrap"><table>' +
-          '<thead><tr><th>Имя</th><th>Телефон</th><th class="num">Заказов</th></tr></thead>' +
-          '<tbody id="clientRows"><tr><td colspan="3" class="hint">Загрузка…</td></tr></tbody>' +
+          '<thead><tr><th>Имя</th><th>Телефон</th><th class="num">Заказов</th><th class="num">Сумма</th><th>Последний заказ</th></tr></thead>' +
+          '<tbody id="clientRows"><tr><td colspan="5" class="hint">Загрузка…</td></tr></tbody>' +
         '</table></div>' +
       '</section>';
 
@@ -549,18 +864,22 @@ tr.low-row{background:#FDF3E3}
     try {
       var results = await Promise.all([
         sb.from('clients').select('*').order('created_at', { ascending: false }),
-        sb.from('orders').select('client_phone')
+        sb.from('orders').select('client_id, budget, status, created_at')
       ]);
       if (results[0].error) throw results[0].error;
       if (results[1].error) throw results[1].error;
-      var counts = {};
+      var agg = {};
       (results[1].data || []).forEach(function(o){
-        if (o.client_phone) counts[o.client_phone] = (counts[o.client_phone] || 0) + 1;
+        if (!o.client_id || o.status === 'cancelled') return;
+        var a = agg[o.client_id] || (agg[o.client_id] = { count: 0, sum: 0, last: null });
+        a.count++;
+        a.sum += o.budget || 0;
+        if (!a.last || o.created_at > a.last) a.last = o.created_at;
       });
       state.clients = (results[0].data || []).map(function(c){
-        var ordersCount = c.phone ? (counts[c.phone] || 0) : 0;
-        return Object.assign({}, c, { ordersCount: ordersCount });
-      });
+        var a = agg[c.id] || { count: 0, sum: 0, last: null };
+        return Object.assign({}, c, { ordersCount: a.count, ordersSum: a.sum, lastOrder: a.last });
+      }).sort(function(a, b){ return b.ordersSum - a.ordersSum; });
       renderClientRows();
     } catch (err) {
       showError(err, 'clientRows');
@@ -601,9 +920,12 @@ tr.low-row{background:#FDF3E3}
   function renderClientRows(){
     var rows = document.getElementById('clientRows');
     if (!rows) return;
-    if (!state.clients.length) { rows.innerHTML = '<tr><td colspan="3" class="hint">Клиентов пока нет</td></tr>'; return; }
+    if (!state.clients.length) { rows.innerHTML = '<tr><td colspan="5" class="hint">Клиентов пока нет</td></tr>'; return; }
     rows.innerHTML = state.clients.map(function(c){
-      return '<tr><td>' + esc(c.name) + '</td><td class="phone-col">' + esc(c.phone || '—') + '</td><td class="num orders-count">' + c.ordersCount + '</td></tr>';
+      return '<tr><td>' + esc(c.name) + '</td><td class="phone-col">' + esc(c.phone || '—') + '</td>' +
+        '<td class="num orders-count">' + c.ordersCount + '</td>' +
+        '<td class="num">' + (c.ordersSum ? money(c.ordersSum) : '—') + '</td>' +
+        '<td class="phone-col">' + (c.lastOrder ? esc(fmtDate(new Date(c.lastOrder))) : '—') + '</td></tr>';
     }).join('');
   }
 
@@ -611,13 +933,48 @@ tr.low-row{background:#FDF3E3}
   function renderStockTab(){
     panel.innerHTML =
       '<section class="card-surface">' +
-        '<h2 style="margin-bottom:18px">Склад</h2>' +
+        '<div class="panel-head-row"><h2>Склад</h2><button type="button" id="toggleStockFormBtn" class="btn-primary">Добавить цветок</button></div>' +
+        '<div id="stockFormArea"></div>' +
         '<div class="table-wrap"><table>' +
-          '<thead><tr><th>Цветок</th><th class="num">Остаток, шт.</th><th class="num">Изменить</th></tr></thead>' +
-          '<tbody id="stockRows"><tr><td colspan="3" class="hint">Загрузка…</td></tr></tbody>' +
+          '<thead><tr><th>Цветок</th><th class="num">Закупка, ₸/шт.</th><th class="num">Остаток, шт.</th><th class="num">Изменить</th></tr></thead>' +
+          '<tbody id="stockRows"><tr><td colspan="4" class="hint">Загрузка…</td></tr></tbody>' +
         '</table></div>' +
+        '<p class="hint" style="margin-top:12px">Закупочная цена нужна, чтобы считать потери на списаниях в «Аналитике».</p>' +
       '</section>';
+    document.getElementById('toggleStockFormBtn').addEventListener('click', function(){
+      state.showStockForm = !state.showStockForm;
+      renderStockForm();
+    });
+    renderStockForm();
     loadInventory();
+  }
+
+  function renderStockForm(){
+    var area = document.getElementById('stockFormArea');
+    if (!area) return;
+    if (!state.showStockForm) { area.innerHTML = ''; return; }
+    area.innerHTML =
+      '<div class="add-form">' +
+        '<label class="field">Цветок<input id="ns-name" placeholder="Роза красная"></label>' +
+        '<label class="field">Закупка, ₸/шт.<input id="ns-price" type="number" min="0" placeholder="0"></label>' +
+        '<label class="field">Остаток, шт.<input id="ns-qty" type="number" min="0" placeholder="0"></label>' +
+        '<button type="button" id="addStockBtn" class="btn-save">Сохранить</button>' +
+      '</div>';
+    document.getElementById('addStockBtn').addEventListener('click', async function(){
+      var name = document.getElementById('ns-name').value.trim();
+      if (!name) return;
+      var btn = document.getElementById('addStockBtn');
+      btn.setAttribute('disabled', 'disabled');
+      var res = await sb.from('inventory').insert({
+        flower_name: name,
+        purchase_price: Math.max(0, parseInt(document.getElementById('ns-price').value, 10) || 0),
+        quantity: Math.max(0, parseInt(document.getElementById('ns-qty').value, 10) || 0)
+      });
+      if (res.error) { btn.removeAttribute('disabled'); alert('Не удалось добавить цветок: ' + res.error.message); return; }
+      state.showStockForm = false;
+      renderStockForm();
+      loadInventory();
+    });
   }
 
   async function loadInventory(){
@@ -634,16 +991,17 @@ tr.low-row{background:#FDF3E3}
   function renderStockRows(){
     var rows = document.getElementById('stockRows');
     if (!rows) return;
-    if (!state.inventory.length) { rows.innerHTML = '<tr><td colspan="3" class="hint">Склад пуст</td></tr>'; return; }
+    if (!state.inventory.length) { rows.innerHTML = '<tr><td colspan="4" class="hint">Склад пуст</td></tr>'; return; }
     rows.innerHTML = state.inventory.map(function(s){
       var low = s.quantity < 10;
       return (
         '<tr class="' + (low ? 'low-row' : '') + '">' +
           '<td><span class="stock-name">' + esc(s.flower_name) + (low ? '<span class="low-badge">мало</span>' : '') + '</span></td>' +
+          '<td class="num"><input class="price-input" type="number" min="0" data-price-id="' + s.id + '" value="' + (s.purchase_price || 0) + '" aria-label="Закупочная цена ' + esc(s.flower_name) + '"></td>' +
           '<td class="num qty-cell">' + s.quantity + '</td>' +
           '<td><div class="qty-btns">' +
-            '<button type="button" class="qty-btn" data-stock-dec="' + s.id + '">−</button>' +
-            '<button type="button" class="qty-btn" data-stock-inc="' + s.id + '">+</button>' +
+            '<button type="button" class="qty-btn" data-stock-dec="' + s.id + '" aria-label="Минус один">−</button>' +
+            '<button type="button" class="qty-btn" data-stock-inc="' + s.id + '" aria-label="Плюс один">+</button>' +
           '</div></td>' +
         '</tr>'
       );
@@ -656,21 +1014,31 @@ tr.low-row{background:#FDF3E3}
     if (inc) { bumpStock(Number(inc.getAttribute('data-stock-inc')), 1); }
     else if (dec) { bumpStock(Number(dec.getAttribute('data-stock-dec')), -1); }
   });
+  panel.addEventListener('change', async function(e){
+    var input = e.target.closest('[data-price-id]');
+    if (!input) return;
+    var id = Number(input.getAttribute('data-price-id'));
+    var price = Math.max(0, parseInt(input.value, 10) || 0);
+    var res = await sb.from('inventory').update({ purchase_price: price }).eq('id', id);
+    if (res.error) { alert('Не удалось сохранить цену: ' + res.error.message); return; }
+    var item = state.inventory.find(function(s){ return s.id === id; });
+    if (item) item.purchase_price = price;
+  });
+
+  /* остаток считает база (adjust_stock), поэтому одновременные клики двух сотрудников не теряются */
   async function bumpStock(id, delta){
     var item = state.inventory.find(function(s){ return s.id === id; });
     if (!item) return;
-    var prevQty = item.quantity;
-    var newQty = Math.max(0, prevQty + delta);
-    item.quantity = newQty;
+    item.quantity = Math.max(0, item.quantity + delta);
     renderStockRows();
-    try {
-      var res = await sb.from('inventory').update({ quantity: newQty }).eq('id', id);
-      if (res.error) throw res.error;
-    } catch (err) {
-      item.quantity = prevQty;
-      renderStockRows();
-      alert('Не удалось обновить остаток: ' + (err.message || err));
+    var res = await sb.rpc('adjust_stock', { item_id: id, delta: delta });
+    if (res.error) {
+      alert('Не удалось обновить остаток: ' + res.error.message);
+      loadInventory();
+      return;
     }
+    item.quantity = res.data;
+    renderStockRows();
   }
 
   /* ---------------- Writeoffs tab ---------------- */
@@ -710,7 +1078,7 @@ tr.low-row{background:#FDF3E3}
                 ? state.inventory.map(function(s){ return '<option value="' + esc(s.flower_name) + '"' + (s.flower_name === state.wo.flower ? ' selected' : '') + '>' + esc(s.flower_name) + '</option>'; }).join('')
                 : '<option value="">нет позиций на складе</option>') +
             '</select></label>' +
-            '<label class="field qty">Количество<input type="number" min="1" id="wo-qty" value="' + state.wo.qty + '"></label>' +
+            '<label class="field qty">Количество<input type="number" min="1" id="wo-qty" value="' + esc(state.wo.qty) + '"></label>' +
             '<label class="field">Причина<select id="wo-reason">' +
               REASONS.map(function(r){ return '<option value="' + r + '"' + (r === state.wo.reason ? ' selected' : '') + '>' + r + '</option>'; }).join('') +
             '</select></label>' +
@@ -720,7 +1088,7 @@ tr.low-row{background:#FDF3E3}
         '<div class="card-surface">' +
           '<h2 style="margin-bottom:16px">История списаний</h2>' +
           '<div class="table-wrap"><table>' +
-            '<thead><tr><th>Цветок</th><th class="num">Кол-во</th><th>Причина</th><th>Дата</th></tr></thead>' +
+            '<thead><tr><th>Цветок</th><th class="num">Кол-во</th><th class="num">Потери</th><th>Причина</th><th>Дата</th></tr></thead>' +
             '<tbody id="writeoffRows"></tbody>' +
           '</table></div>' +
         '</div>' +
@@ -736,15 +1104,18 @@ tr.low-row{background:#FDF3E3}
   function renderWriteoffRows(){
     var rows = document.getElementById('writeoffRows');
     if (!rows) return;
-    if (!state.writeoffs.length) { rows.innerHTML = '<tr><td colspan="4" class="hint">Списаний пока нет</td></tr>'; return; }
+    if (!state.writeoffs.length) { rows.innerHTML = '<tr><td colspan="5" class="hint">Списаний пока нет</td></tr>'; return; }
     rows.innerHTML = state.writeoffs.map(function(w){
+      var loss = (w.unit_cost || 0) * (w.quantity || 0);
       return (
         '<tr><td>' + esc(w.flower_name) + '</td><td class="num wo-qty">' + w.quantity + '</td>' +
+        '<td class="num">' + (loss ? money(loss) : '—') + '</td>' +
         '<td><span class="reason-tag">' + esc(w.reason) + '</span></td><td class="phone-col">' + esc(fmtDate(new Date(w.created_at))) + '</td></tr>'
       );
     }).join('');
   }
 
+  /* списание и уменьшение остатка — одна транзакция в базе (write_off) */
   async function onAddWriteoff(){
     var flowerName = state.wo.flower;
     if (!flowerName) return;
@@ -753,14 +1124,8 @@ tr.low-row{background:#FDF3E3}
     var btn = document.getElementById('addWriteoffBtn');
     btn.setAttribute('disabled', 'disabled');
     try {
-      var insertRes = await sb.from('write_offs').insert({ flower_name: flowerName, quantity: qty, reason: reason });
-      if (insertRes.error) throw insertRes.error;
-      var item = state.inventory.find(function(s){ return s.flower_name === flowerName; });
-      if (item) {
-        var newQty = Math.max(0, item.quantity - qty);
-        var updateRes = await sb.from('inventory').update({ quantity: newQty }).eq('id', item.id);
-        if (updateRes.error) throw updateRes.error;
-      }
+      var res = await sb.rpc('write_off', { p_flower: flowerName, p_qty: qty, p_reason: reason });
+      if (res.error) throw res.error;
       state.wo = { flower: flowerName, qty: 1, reason: reason };
       loadWriteoffsTabData();
     } catch (err) {
@@ -769,52 +1134,333 @@ tr.low-row{background:#FDF3E3}
     }
   }
 
-  /* ---------------- Summary tab ---------------- */
-  async function renderSummaryTab(){
-    panel.innerHTML = '<section class="stat-grid"><p class="hint">Считаем метрики…</p></section>';
-    try {
-      var now = new Date();
-      var startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      var startOfTodayISO = startOfToday.toISOString();
-      var endOfTodayISO = new Date(startOfToday.getTime() + 24 * 3600 * 1000).toISOString();
-      var weekAgoISO = new Date(now.getTime() - 7 * 24 * 3600 * 1000).toISOString();
-      var monthAgoISO = new Date(now.getTime() - 30 * 24 * 3600 * 1000).toISOString();
+  /* ---------------- Analytics tab ---------------- */
+  var PERIODS = [[7,'7 дней'],[30,'30 дней'],[90,'90 дней']];
+  var WEEK_ROWS = [['Пн',1],['Вт',2],['Ср',3],['Чт',4],['Пт',5],['Сб',6],['Вс',0]];
+  var STAGES = [['new','build','Принят → в сборке'],['build','courier','Сборка → курьер'],['courier','done','Курьер → доставлен']];
+  var LATE_GRACE_MIN = 15;
 
-      var results = await Promise.all([
-        sb.from('orders').select('id', { count: 'exact', head: true }).gte('created_at', startOfTodayISO).lt('created_at', endOfTodayISO),
-        sb.from('orders').select('budget').gte('created_at', weekAgoISO),
-        sb.from('write_offs').select('quantity').gte('created_at', monthAgoISO),
-        sb.from('inventory').select('id', { count: 'exact', head: true }).lt('quantity', 10)
-      ]);
-      results.forEach(function(r){ if (r.error) throw r.error; });
-
-      var todayCount = results[0].count || 0;
-      var revenue = (results[1].data || []).reduce(function(a, o){ return a + (o.budget || 0); }, 0);
-      var writtenOff = (results[2].data || []).reduce(function(a, w){ return a + (w.quantity || 0); }, 0);
-      var low = results[3].count || 0;
-
-      var metrics = [
-        { label:'Заказов сегодня', value: String(todayCount), note:'принято за текущий день' },
-        { label:'Выручка за неделю', value: money(revenue), note:'сумма бюджетов заказов за 7 дней' },
-        { label:'Списано за месяц', value: writtenOff + ' шт.', note:'по всем причинам за 30 дней' },
-        { label:'Позиций с низким остатком', value: String(low), note:'остаток меньше 10 шт.' }
-      ];
-      panel.innerHTML =
-        '<section class="stat-grid">' +
-          metrics.map(function(m){
-            return (
-              '<div class="stat-card">' +
-                '<p class="stat-label">' + esc(m.label) + '</p>' +
-                '<p class="stat-value">' + esc(m.value) + '</p>' +
-                '<p class="stat-note">' + esc(m.note) + '</p>' +
-              '</div>'
-            );
-          }).join('') +
-        '</section>';
-    } catch (err) {
-      showError(err);
-    }
+  function renderSummaryTab(){
+    var host = document.getElementById('analytics');
+    if (host) host.classList.add('refreshing');
+    else panel.innerHTML = '<p class="hint">Считаем аналитику…</p>';
+    loadAnalytics().catch(function(err){ showError(err); });
   }
+
+  panel.addEventListener('click', function(e){
+    var p = e.target.closest('[data-period]');
+    if (!p) return;
+    state.period = Number(p.getAttribute('data-period'));
+    renderSummaryTab();
+  });
+
+  async function loadAnalytics(){
+    var now = new Date();
+    var startDay = addDays(new Date(now.getFullYear(), now.getMonth(), now.getDate()), -(state.period - 1));
+    var sinceISO = startDay.toISOString();
+    var results = await Promise.all([
+      sb.from('orders').select('id, budget, status, channel, client_id, client_name, items, delivery_on, delivery_time, created_at').limit(10000),
+      sb.from('order_status_history').select('order_id, status, changed_at').gte('changed_at', addDays(startDay, -14).toISOString()).limit(50000),
+      sb.from('write_offs').select('flower_name, quantity, unit_cost, created_at').gte('created_at', sinceISO),
+      sb.from('inventory').select('id', { count: 'exact', head: true }).lt('quantity', 10),
+      sb.from('clients').select('id, name')
+    ]);
+    results.forEach(function(r){ if (r.error) throw r.error; });
+    if (state.tab !== 'summary') return;
+    var a = computeAnalytics(results[0].data || [], results[1].data || [], results[2].data || [], startDay, now);
+    a.lowStock = results[3].count || 0;
+    var names = {};
+    (results[4].data || []).forEach(function(c){ names[c.id] = c.name; });
+    a.topClients.forEach(function(c){ c.name = names[c.id] || c.fallbackName || 'Без имени'; });
+    renderAnalytics(a);
+  }
+
+  function computeAnalytics(allOrders, history, writeoffs, startDay, now){
+    var startKey = isoDay(startDay);
+    var hist = {};
+    history.forEach(function(h){
+      var byStatus = hist[h.order_id] || (hist[h.order_id] = {});
+      if (!byStatus[h.status] || h.changed_at < byStatus[h.status]) byStatus[h.status] = h.changed_at;
+    });
+
+    // заказ относится к периоду по дате создания; выручка — по дню доставки
+    var inPeriod = allOrders.filter(function(o){ return new Date(o.created_at) >= startDay; });
+    var active = inPeriod.filter(function(o){ return o.status !== 'cancelled'; });
+    var cancelled = inPeriod.length - active.length;
+
+    var days = [];
+    for (var d = new Date(startDay); d <= now; d = addDays(d, 1)) days.push({ key: isoDay(d), date: new Date(d), revenue: 0, orders: 0 });
+    var dayIndex = {};
+    days.forEach(function(x, i){ dayIndex[x.key] = i; });
+
+    var delivered = allOrders.filter(function(o){ return o.status === 'done'; });
+    var revenue = 0, deliveredCount = 0;
+    delivered.forEach(function(o){
+      var doneAt = hist[o.id] && hist[o.id].done;
+      var key = o.delivery_on || (doneAt ? isoDay(new Date(doneAt)) : isoDay(new Date(o.created_at)));
+      if (key < startKey || dayIndex[key] == null) return;
+      days[dayIndex[key]].revenue += o.budget || 0;
+      days[dayIndex[key]].orders++;
+      revenue += o.budget || 0;
+      deliveredCount++;
+    });
+
+    // каналы
+    var channels = ['WhatsApp','Instagram'].map(function(name){
+      var list = active.filter(function(o){ return (o.channel || 'WhatsApp') === name; });
+      var sum = list.reduce(function(s, o){ return s + (o.budget || 0); }, 0);
+      return { name: name, orders: list.length, revenue: sum, avg: list.length ? sum / list.length : 0 };
+    });
+
+    // клиенты: повторный — у кого за всё время 2+ неотменённых заказа
+    var totalByClient = {};
+    allOrders.forEach(function(o){
+      if (o.client_id && o.status !== 'cancelled') totalByClient[o.client_id] = (totalByClient[o.client_id] || 0) + 1;
+    });
+    var periodClients = {};
+    active.forEach(function(o){
+      if (!o.client_id) return;
+      var c = periodClients[o.client_id] || (periodClients[o.client_id] = { id: o.client_id, orders: 0, sum: 0, fallbackName: o.client_name });
+      c.orders++;
+      c.sum += o.budget || 0;
+    });
+    var clientIds = Object.keys(periodClients);
+    var repeat = clientIds.filter(function(id){ return totalByClient[id] >= 2; }).length;
+    var topClients = clientIds.map(function(id){ return periodClients[id]; })
+      .sort(function(x, y){ return y.sum - x.sum || y.orders - x.orders; }).slice(0, 10);
+
+    // когда приходят заказы: день недели × час
+    var heat = {};
+    var heatMax = 0;
+    inPeriod.forEach(function(o){
+      var t = new Date(o.created_at);
+      var k = t.getDay() + '-' + t.getHours();
+      heat[k] = (heat[k] || 0) + 1;
+      if (heat[k] > heatMax) heatMax = heat[k];
+    });
+
+    // скорость по этапам (медиана) и опоздания
+    var stages = STAGES.map(function(s){
+      var mins = [];
+      inPeriod.forEach(function(o){
+        var h = hist[o.id];
+        if (!h || !h[s[0]] || !h[s[1]]) return;
+        var m = (new Date(h[s[1]]) - new Date(h[s[0]])) / 60000;
+        if (m >= 0) mins.push(m);
+      });
+      mins.sort(function(x, y){ return x - y; });
+      return { label: s[2], median: mins.length ? mins[Math.floor(mins.length / 2)] : null, n: mins.length };
+    });
+    var lateChecked = 0, lateCount = 0;
+    inPeriod.forEach(function(o){
+      var doneAt = hist[o.id] && hist[o.id].done;
+      var planned = o.delivery_time ? deliveryPlanned(o) : null;
+      if (o.status !== 'done' || !doneAt || !planned) return;
+      lateChecked++;
+      if (new Date(doneAt) - planned > LATE_GRACE_MIN * 60000) lateCount++;
+    });
+
+    // популярные цветы и потери
+    var flowers = {};
+    function fl(name){
+      var key = name.trim().toLowerCase();
+      return flowers[key] || (flowers[key] = { name: name.trim(), sold: 0, wasted: 0, loss: 0 });
+    }
+    active.forEach(function(o){
+      (o.items || []).forEach(function(it){ if (it && it.flower) fl(it.flower).sold += it.qty || 0; });
+    });
+    var wasteLoss = 0;
+    writeoffs.forEach(function(w){
+      if (!w.flower_name) return;
+      var f = fl(w.flower_name);
+      f.wasted += w.quantity || 0;
+      f.loss += (w.quantity || 0) * (w.unit_cost || 0);
+      wasteLoss += (w.quantity || 0) * (w.unit_cost || 0);
+    });
+    var flowerList = Object.keys(flowers).map(function(k){ return flowers[k]; });
+    var topFlowers = flowerList.filter(function(f){ return f.sold > 0; })
+      .sort(function(x, y){ return y.sold - x.sold; }).slice(0, 10);
+    var waste = flowerList.filter(function(f){ return f.wasted > 0; })
+      .sort(function(x, y){ return y.loss - x.loss || y.wasted - x.wasted; }).slice(0, 10);
+
+    return {
+      revenue: revenue, deliveredCount: deliveredCount, ordersCount: active.length,
+      avgCheck: deliveredCount ? revenue / deliveredCount : 0,
+      cancelled: cancelled, cancelRate: pct(cancelled, inPeriod.length),
+      repeat: repeat, clientsCount: clientIds.length,
+      days: days, channels: channels, topClients: topClients,
+      heat: heat, heatMax: heatMax,
+      stages: stages, lateChecked: lateChecked, lateCount: lateCount,
+      topFlowers: topFlowers, waste: waste, wasteLoss: wasteLoss
+    };
+  }
+
+  function statTile(label, value, note){
+    return '<div class="stat-card"><p class="stat-label">' + esc(label) + '</p><p class="stat-value">' + esc(value) + '</p><p class="stat-note">' + esc(note) + '</p></div>';
+  }
+
+  function chartCard(title, sub, body, wide){
+    return '<section class="card-surface chart-card' + (wide ? ' wide' : '') + '"><div class="chart-head"><h2>' + esc(title) + '</h2>' +
+      (sub ? '<p class="hint">' + esc(sub) + '</p>' : '') + '</div>' + body + '</section>';
+  }
+  function emptyNote(text){ return '<p class="chart-empty">' + esc(text) + '</p>'; }
+
+  /* горизонтальные полосы: подпись · полоса · значение у конца */
+  function barList(rows, fmt){
+    var max = Math.max.apply(null, rows.map(function(r){ return r.value; }).concat([1]));
+    return '<div class="hbars">' + rows.map(function(r){
+      var w = Math.max(1, r.value / max * 100);
+      return '<div class="hbar-row" data-tip="' + esc(r.label + ': ' + fmt(r.value) + (r.extra ? ' · ' + r.extra : '')) + '" tabindex="0">' +
+        '<span class="hbar-label">' + esc(r.label) + '</span>' +
+        '<span class="hbar-track"><span class="hbar" style="width:' + w + '%"></span></span>' +
+        '<span class="hbar-value">' + esc(fmt(r.value)) + '</span>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+
+  function revenueChart(days){
+    var W = Math.max(300, Math.round(panel.clientWidth - 48)), H = 240, padL = 56, padR = 8, padT = 16, padB = 28;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var max = Math.max.apply(null, days.map(function(d){ return d.revenue; }).concat([1]));
+    var step = Math.pow(10, Math.floor(Math.log10(max)));
+    var top = Math.ceil(max / step) * step;
+    var slot = plotW / days.length;
+    var bw = Math.max(2, Math.min(24, slot - 2));
+    var maxIdx = -1, maxVal = 0;
+    days.forEach(function(d, i){ if (d.revenue > maxVal) { maxVal = d.revenue; maxIdx = i; } });
+    var labelEvery = Math.ceil(days.length / Math.max(2, Math.floor(plotW / 64)));  // ~64px на подпись даты
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="chart-svg" role="img" aria-label="Выручка по дням">';
+    [0, 0.5, 1].forEach(function(t){
+      var y = padT + plotH - t * plotH;
+      svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y + '" y2="' + y + '" class="grid"/>' +
+        '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" class="tick" text-anchor="end">' + esc(compact(top * t)) + '</text>';
+    });
+    days.forEach(function(d, i){
+      var x = padL + i * slot + (slot - bw) / 2;
+      var h = d.revenue / top * plotH;
+      var y = padT + plotH - h;
+      var r = Math.min(4, bw / 2, h);
+      if (h > 0) {
+        svg += '<path class="bar" d="M' + x + ',' + (padT + plotH) + 'V' + (y + r) + 'Q' + x + ',' + y + ' ' + (x + r) + ',' + y +
+          'H' + (x + bw - r) + 'Q' + (x + bw) + ',' + y + ' ' + (x + bw) + ',' + (y + r) + 'V' + (padT + plotH) + 'Z"/>';
+      }
+      svg += '<rect class="hit" x="' + (padL + i * slot) + '" y="' + padT + '" width="' + slot + '" height="' + plotH + '" data-tip="' +
+        esc(fmtDate(d.date) + ': ' + money(d.revenue) + ' · заказов: ' + d.orders) + '"/>';
+      if (i % labelEvery === 0) {
+        svg += '<text x="' + (padL + i * slot + slot / 2) + '" y="' + (H - 8) + '" class="tick" text-anchor="middle">' + esc(fmtDate(d.date)) + '</text>';
+      }
+    });
+    if (maxIdx >= 0) {
+      var mx = padL + maxIdx * slot + slot / 2;
+      var my = padT + plotH - maxVal / top * plotH - 6;
+      svg += '<text x="' + Math.min(Math.max(mx, padL + 30), W - 40) + '" y="' + Math.max(my, 12) + '" class="peak" text-anchor="middle">' + esc(compact(maxVal)) + '</text>';
+    }
+    svg += '</svg>';
+    var table = '<details class="chart-table"><summary>Таблица</summary><div class="table-wrap"><table><thead><tr><th>День</th><th class="num">Заказов</th><th class="num">Выручка</th></tr></thead><tbody>' +
+      days.map(function(d){ return '<tr><td>' + esc(fmtDate(d.date)) + '</td><td class="num">' + d.orders + '</td><td class="num">' + money(d.revenue) + '</td></tr>'; }).join('') +
+      '</tbody></table></div></details>';
+    return '<div class="chart-box">' + svg + '</div>' + table;
+  }
+  function compact(n){
+    if (n >= 1e6) return (Math.round(n / 1e5) / 10) + ' млн';
+    if (n >= 1e3) return (Math.round(n / 100) / 10) + ' тыс';
+    return String(Math.round(n));
+  }
+
+  function heatmap(heat, max){
+    var steps = [0, 18, 38, 60, 82];
+    function level(v){ return v ? Math.min(4, Math.ceil(v / max * 4)) : 0; }
+    var html = '<div class="heat-wrap"><div class="heat" role="table" aria-label="Заказы по дням недели и часам">';
+    html += '<span></span>';
+    for (var h = 0; h < 24; h++) html += '<span class="heat-hour">' + (h % 3 === 0 ? h : '') + '</span>';
+    WEEK_ROWS.forEach(function(r){
+      html += '<span class="heat-day">' + r[0] + '</span>';
+      for (var h2 = 0; h2 < 24; h2++) {
+        var v = heat[r[1] + '-' + h2] || 0;
+        html += '<span class="heat-cell" style="--lvl:' + steps[level(v)] + '%" data-tip="' + esc(r[0] + ', ' + h2 + ':00–' + (h2 + 1) + ':00 — заказов: ' + v) + '" tabindex="-1"></span>';
+      }
+    });
+    html += '</div><div class="heat-legend"><span>меньше</span>' +
+      steps.map(function(s){ return '<span class="heat-cell" style="--lvl:' + s + '%"></span>'; }).join('') + '<span>больше</span></div></div>';
+    return html;
+  }
+
+  function renderAnalytics(a){
+    var tiles =
+      statTile('Выручка', money(a.revenue), 'доставленные заказы за период') +
+      statTile('Средний чек', a.deliveredCount ? money(a.avgCheck) : '—', 'по доставленным заказам') +
+      statTile('Заказов', String(a.ordersCount), 'без отменённых · отмен: ' + a.cancelRate) +
+      statTile('Повторные клиенты', pct(a.repeat, a.clientsCount), a.repeat + ' из ' + a.clientsCount + ' клиентов периода') +
+      statTile('Опоздания', a.lateChecked ? pct(a.lateCount, a.lateChecked) : '—', a.lateChecked ? a.lateCount + ' из ' + a.lateChecked + ' с указанным временем' : 'нет доставок с указанным временем') +
+      statTile('Потери на списаниях', money(a.wasteLoss), 'по закупочной цене · позиций с низким остатком: ' + a.lowStock);
+
+    var channelTable = '<div class="table-wrap"><table class="compare"><thead><tr><th>Канал</th><th class="num">Заказов</th><th class="num">Сумма</th><th class="num">Средний чек</th></tr></thead><tbody>' +
+      a.channels.map(function(c){
+        return '<tr><td><span class="channel-badge ' + (c.name === 'WhatsApp' ? 'wa' : 'ig') + '">' + c.name + '</span></td>' +
+          '<td class="num">' + c.orders + '</td><td class="num">' + money(c.revenue) + '</td><td class="num">' + (c.orders ? money(c.avg) : '—') + '</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      barList(a.channels.map(function(c){ return { label: c.name, value: c.revenue, extra: c.orders + ' заказов' }; }), money);
+
+    var hasHistory = a.stages.some(function(s){ return s.n > 0; });
+
+    panel.innerHTML =
+      '<div id="analytics" class="panel-stack">' +
+        '<div class="board-toolbar">' +
+          '<div class="pill-group" role="group" aria-label="Период">' +
+            PERIODS.map(function(p){ return '<button type="button" class="pill' + (state.period === p[0] ? ' active' : '') + '" data-period="' + p[0] + '">' + p[1] + '</button>'; }).join('') +
+          '</div>' +
+        '</div>' +
+        '<section class="stat-grid">' + tiles + '</section>' +
+        '<div class="chart-grid">' +
+          chartCard('Выручка по дням', 'доставленные заказы, ₸', a.revenue ? revenueChart(a.days) : emptyNote('Пока нет доставленных заказов за период'), true) +
+          chartCard('WhatsApp или Instagram', 'неотменённые заказы за период', channelTable) +
+          chartCard('Лучшие клиенты', 'по сумме заказов за период',
+            a.topClients.length ? barList(a.topClients.map(function(c){ return { label: c.name, value: c.sum, extra: c.orders + ' заказ(ов)' }; }), money) : emptyNote('Нет заказов с телефоном клиента')) +
+          chartCard('Когда приходят заказы', 'день недели × час создания заказа', a.heatMax ? heatmap(a.heat, a.heatMax) : emptyNote('Нет заказов за период'), true) +
+          chartCard('Скорость по этапам', 'медиана времени между статусами',
+            hasHistory ? barList(a.stages.filter(function(s){ return s.n; }).map(function(s){ return { label: s.label, value: s.median, extra: 'заказов: ' + s.n }; }), fmtDuration)
+              : emptyNote('Появится, когда заказы пройдут этапы после обновления')) +
+          chartCard('Популярные цветы', 'штук в заказах за период',
+            a.topFlowers.length ? barList(a.topFlowers.map(function(f){ return { label: f.name, value: f.sold }; }), function(v){ return num(v) + ' шт.'; })
+              : emptyNote('Появится, когда в заказах будут позиции (ИИ заполняет их сам)')) +
+          chartCard('Потери на списаниях', 'по цветам за период',
+            a.waste.length ? wasteTable(a.waste) : emptyNote('Списаний за период нет'), true) +
+        '</div>' +
+      '</div>';
+  }
+
+  function wasteTable(rows){
+    return '<div class="table-wrap"><table><thead><tr><th>Цветок</th><th class="num">Списано, шт.</th><th class="num">Продано, шт.</th><th class="num">Доля потерь</th><th class="num">Потери</th></tr></thead><tbody>' +
+      rows.map(function(f){
+        return '<tr><td>' + esc(f.name) + '</td><td class="num">' + num(f.wasted) + '</td><td class="num">' + num(f.sold) + '</td>' +
+          '<td class="num">' + pct(f.wasted, f.wasted + f.sold) + '</td><td class="num">' + (f.loss ? money(f.loss) : '—') + '</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      '<p class="hint" style="margin-top:10px">Доля потерь = списано / (списано + продано). Потери в ₸ считаются, если на «Складе» указана закупочная цена.</p>';
+  }
+
+  /* общий тултип для графиков: наведение мышью и фокус с клавиатуры */
+  var tip = document.getElementById('chartTip');
+  function showTip(target, x, y){
+    tip.textContent = target.getAttribute('data-tip');
+    tip.hidden = false;
+    var r = tip.getBoundingClientRect();
+    tip.style.left = Math.min(window.innerWidth - r.width - 8, Math.max(8, x - r.width / 2)) + 'px';
+    tip.style.top = Math.max(8, y - r.height - 12) + 'px';
+  }
+  panel.addEventListener('mousemove', function(e){
+    var t = e.target.closest('[data-tip]');
+    if (!t) { tip.hidden = true; return; }
+    showTip(t, e.clientX, e.clientY);
+  });
+  panel.addEventListener('mouseleave', function(){ tip.hidden = true; });
+  panel.addEventListener('focusin', function(e){
+    var t = e.target.closest('[data-tip]');
+    if (!t) return;
+    var r = t.getBoundingClientRect();
+    showTip(t, r.left + r.width / 2, r.top);
+  });
+  panel.addEventListener('focusout', function(){ tip.hidden = true; });
+
 
   /* ---------------- auth ---------------- */
   var userBar = document.getElementById('userBar');
