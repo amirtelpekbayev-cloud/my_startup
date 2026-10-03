@@ -25,9 +25,11 @@ AI-ассистент приёма заказов для цветочного м
 ## Настройка Supabase
 
 1. Создать проект на [supabase.com](https://supabase.com).
-2. Открыть **SQL Editor** и выполнить целиком файл [`supabase/schema.sql`](supabase/schema.sql) — он создаёт таблицы `orders`, `clients`, `inventory`, `write_offs` и включает RLS-политики, разрешающие доступ anon-ключу (в приложении нет авторизации).
-3. Скопировать `Project URL` и `anon`/`publishable` ключ из Project Settings → API.
-4. Заполнить `.env.local` (см. `.env.example`):
+2. Открыть **SQL Editor** и выполнить целиком файл [`supabase/schema.sql`](supabase/schema.sql) — он создаёт таблицы `orders`, `clients`, `inventory`, `write_offs` и включает RLS-политики: доступ к данным есть только у вошедших пользователей.
+3. **Authentication → Users → Add user** — создать аккаунт (email + пароль) для каждого сотрудника, с галочкой Auto Confirm User.
+4. **Authentication → Sign In / Providers** — выключить *Allow new users to sign up*, чтобы посторонние не могли зарегистрироваться сами.
+5. Скопировать `Project URL` и `anon`/`publishable` ключ из Project Settings → API.
+6. Заполнить `.env.local` (см. `.env.example`):
    ```
    SUPABASE_URL=https://xxxxx.supabase.co
    SUPABASE_ANON_KEY=sb_publishable_xxxxx

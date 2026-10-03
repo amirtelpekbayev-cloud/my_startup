@@ -55,6 +55,14 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .brand p{margin:6px 0 0;font-size:14px;color:var(--rose)}
 .demo-pill{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:999px;padding:8px 16px;box-shadow:0 2px 10px rgba(109,46,70,.08);font-size:13px;color:var(--burgundy);white-space:nowrap}
 .demo-dot{width:9px;height:9px;border-radius:50%;background:#2f6d5d;flex:none}
+.user-bar{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--rose)}
+.user-bar[hidden]{display:none}
+
+/* ---------- login ---------- */
+.login-card{max-width:400px;margin:40px auto 0}
+.login-card h2{margin-bottom:6px}
+.login-card form{display:flex;flex-direction:column;gap:14px;margin-top:18px}
+.login-error{margin:0;font-size:13px;color:#a8342f}
 
 /* ---------- tabs ---------- */
 .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px}
@@ -183,6 +191,10 @@ tr.low-row{background:#FDF3E3}
       <h1>Florify</h1>
       <p>AI-ассистент приёма заказов для цветочного магазина</p>
     </div>
+    <div class="user-bar" id="userBar" hidden>
+      <span id="userEmail"></span>
+      <button type="button" id="logoutBtn" class="btn-cancel">Выйти</button>
+    </div>
   </header>
 
   <nav class="tabs" id="tabs"></nav>
@@ -214,9 +226,12 @@ tr.low-row{background:#FDF3E3}
   /* Настоящее распознавание переписки идёт через Claude API (/api/parse-order),
      а не локальной эвристикой — см. onRecognize(). */
   async function parseOrder(text){
+    var sessionRes = await sb.auth.getSession();
+    var session = sessionRes.data && sessionRes.data.session;
+    if (!session) throw new Error('Сессия истекла — войдите заново');
     var res = await fetch('/api/parse-order', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
       body: JSON.stringify({ text: text })
     });
     if (!res.ok) {
@@ -801,6 +816,51 @@ tr.low-row{background:#FDF3E3}
     }
   }
 
+  /* ---------------- auth ---------------- */
+  var userBar = document.getElementById('userBar');
+  var appStarted = false;
+
+  function renderLogin(errorMsg){
+    appStarted = false;
+    userBar.hidden = true;
+    tabsEl.innerHTML = '';
+    panel.innerHTML =
+      '<section class="card-surface login-card">' +
+        '<h2>Вход</h2>' +
+        '<p class="hint">Доступ только для сотрудников магазина.</p>' +
+        '<form id="loginForm">' +
+          '<label class="field">Email<input id="loginEmail" type="email" autocomplete="username" required></label>' +
+          '<label class="field">Пароль<input id="loginPassword" type="password" autocomplete="current-password" required></label>' +
+          (errorMsg ? '<p class="login-error">' + esc(errorMsg) + '</p>' : '') +
+          '<button type="submit" id="loginBtn" class="btn-primary">Войти</button>' +
+        '</form>' +
+      '</section>';
+    document.getElementById('loginForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      var btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.textContent = 'Входим…';
+      var res = await sb.auth.signInWithPassword({
+        email: document.getElementById('loginEmail').value.trim(),
+        password: document.getElementById('loginPassword').value
+      });
+      if (res.error) renderLogin('Неверный email или пароль');
+    });
+  }
+
+  function startApp(session){
+    document.getElementById('userEmail').textContent = session.user.email || '';
+    userBar.hidden = false;
+    if (appStarted) return;
+    appStarted = true;
+    renderTabs();
+    renderPanel();
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', function(){
+    sb.auth.signOut();
+  });
+
   /* ---------------- boot ---------------- */
   async function boot(){
     try {
@@ -814,8 +874,13 @@ tr.low-row{background:#FDF3E3}
       panel.innerHTML = '<section class="card-surface"><h2>Ошибка подключения к Supabase</h2><p class="hint">' + esc(err.message || String(err)) + '</p></section>';
       return;
     }
-    renderTabs();
-    renderPanel();
+    // setTimeout: supabase-js не рекомендует вызывать sb.* прямо внутри колбэка (возможен deadlock)
+    sb.auth.onAuthStateChange(function(event, session){
+      setTimeout(function(){
+        if (session) startApp(session);
+        else renderLogin();
+      }, 0);
+    });
   }
   boot();
 })();

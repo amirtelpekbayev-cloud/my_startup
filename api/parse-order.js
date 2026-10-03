@@ -38,6 +38,20 @@ function buildPrompt(text) {
   );
 }
 
+// Пускаем только залогиненных сотрудников: проверяем Supabase access token,
+// иначе любой, кто знает URL, может тратить наш ключ Claude API.
+async function getUser(req) {
+  var auth = req.headers.authorization || '';
+  var token = auth.indexOf('Bearer ') === 0 ? auth.slice(7) : '';
+  if (!token || !process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) return null;
+  var r = await fetch(process.env.SUPABASE_URL + '/auth/v1/user', {
+    headers: { apikey: process.env.SUPABASE_ANON_KEY, Authorization: 'Bearer ' + token }
+  });
+  return r.ok ? r.json() : null;
+}
+
+const MAX_TEXT_LENGTH = 5000;
+
 function extractJson(text) {
   var fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
   var candidate = fenced ? fenced[1] : text;
@@ -50,6 +64,12 @@ module.exports = async (req, res) => {
     return;
   }
 
+  var user = await getUser(req).catch(function () { return null; });
+  if (!user) {
+    res.status(401).json({ error: 'Требуется вход' });
+    return;
+  }
+
   var body = req.body;
   if (typeof body === 'string') {
     try { body = JSON.parse(body); } catch (e) { body = {}; }
@@ -57,6 +77,10 @@ module.exports = async (req, res) => {
   var text = body && typeof body.text === 'string' ? body.text : '';
   if (!text.trim()) {
     res.status(400).json({ error: 'text is required' });
+    return;
+  }
+  if (text.length > MAX_TEXT_LENGTH) {
+    res.status(400).json({ error: 'Текст слишком длинный (максимум ' + MAX_TEXT_LENGTH + ' символов)' });
     return;
   }
 

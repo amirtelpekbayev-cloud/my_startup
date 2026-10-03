@@ -37,10 +37,11 @@ create table if not exists write_offs (
   created_at timestamptz not null default now()
 );
 
--- В приложении нет авторизации (один магазин, все экраны открыты всем, у кого есть
--- ссылка), поэтому RLS включаем, но даём anon-ключу полный доступ ко всем 4 таблицам.
--- Это соответствует текущему поведению прототипа, но не подходит для реальных клиентских
--- данных без отдельного слоя аутентификации.
+-- Доступ только для залогиненных сотрудников (Supabase Auth, роль authenticated).
+-- Anon-ключ публичен (его отдаёт /api/config), поэтому без входа данные недоступны.
+-- Пользователей создавать в Dashboard -> Authentication -> Users -> Add user,
+-- а публичную регистрацию отключить: Authentication -> Sign In / Providers -> Allow new users to sign up = off.
+-- Файл можно запускать повторно: старые политики с полным доступом для anon удаляются.
 
 alter table orders enable row level security;
 alter table clients enable row level security;
@@ -48,13 +49,18 @@ alter table inventory enable row level security;
 alter table write_offs enable row level security;
 
 drop policy if exists "orders_anon_all" on orders;
-create policy "orders_anon_all" on orders for all using (true) with check (true);
-
 drop policy if exists "clients_anon_all" on clients;
-create policy "clients_anon_all" on clients for all using (true) with check (true);
-
 drop policy if exists "inventory_anon_all" on inventory;
-create policy "inventory_anon_all" on inventory for all using (true) with check (true);
-
 drop policy if exists "write_offs_anon_all" on write_offs;
-create policy "write_offs_anon_all" on write_offs for all using (true) with check (true);
+
+drop policy if exists "orders_staff_all" on orders;
+create policy "orders_staff_all" on orders for all to authenticated using (true) with check (true);
+
+drop policy if exists "clients_staff_all" on clients;
+create policy "clients_staff_all" on clients for all to authenticated using (true) with check (true);
+
+drop policy if exists "inventory_staff_all" on inventory;
+create policy "inventory_staff_all" on inventory for all to authenticated using (true) with check (true);
+
+drop policy if exists "write_offs_staff_all" on write_offs;
+create policy "write_offs_staff_all" on write_offs for all to authenticated using (true) with check (true);
